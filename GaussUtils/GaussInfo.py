@@ -206,7 +206,7 @@ class Gauss16Info:
     def get_torch_data(self) -> torch_geometric.data.Data:
         _tmp_data = {"R": torch.as_tensor(self.qm_coords).view(-1, 3),
                      "Z": torch.as_tensor(self.elements).view(-1),
-                     "Q": torch.as_tensor([0]).view(-1),
+                     "Q": torch.as_tensor([0.]).view(-1),
                      "D": torch.as_tensor(self.dipole).view(-1, 3),
                      "F": torch.as_tensor([[0., 0., 0.]]).view(-1, 3),
                      "E": torch.as_tensor(self.prop_dict_raw["U0_atom"]).view(-1),
