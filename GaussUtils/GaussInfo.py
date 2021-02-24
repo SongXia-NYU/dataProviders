@@ -31,7 +31,6 @@ class Gauss16Info:
         # for conversion of element_p, which is the column and period of element
         self._element_periodic = {"H": [1, 1], "B": [2, 3], "C": [2, 4], "N": [2, 5], "O": [2, 6], "F": [2, 7],
                                   "P": [3, 5], "S": [3, 6], "Cl": [3, 7], "Br": [4, 7]}
-        self._reference = np.load("atomref.B3LYP_631Gd.10As.npz")["atom_ref"]
 
         self.log_path = log_path
         self.log_lines = open(log_path).readlines() if log_path is not None else None
@@ -54,6 +53,7 @@ class Gauss16Info:
 
         self.prop_dict_raw = prop_dict_raw
         if self.prop_dict_raw is None:
+            self._reference = np.load("atomref.B3LYP_631Gd.10As.npz")["atom_ref"]
             self.prop_dict_raw = {}
             # read properties from log file
             self._read_prop()
