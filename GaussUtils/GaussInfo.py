@@ -243,8 +243,9 @@ def sdf_to_pt(n_heavy, src_root, dst_root):
         indexes = target_csv["index"].values.reshape(-1).tolist()
         opt_sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}.opt.sdf".format(i)) for i in indexes]
     else:
-        indexes = target_csv["index"].values.reshape(-1).tolist()
-        sources = target_csv["source"].values.reshape(-1).tolist()
+        index_csv = pd.read_csv(osp.join(src_root, "Frag20_{}_index.csv".format(n_heavy, n_heavy)))
+        indexes = index_csv["idx"].values.reshape(-1).tolist()
+        sources = index_csv["source"].values.reshape(-1).tolist()
         opt_sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}".format(s), "{}.opt.sdf".format(i))
                    for i, s in zip(indexes, sources)]
 
