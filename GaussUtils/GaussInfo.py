@@ -10,6 +10,8 @@ from tqdm import tqdm
 import argparse
 import numpy as np
 
+from DataPrepareUtils import my_pre_transform
+
 
 class Gauss16Info:
     def __init__(self, log_path: str = None, qm_sdf: str = None, mmff_sdf: str = None, dipole: torch.Tensor = None,
@@ -241,7 +243,11 @@ def sdf_to_pt(n_heavy, src_root, dst_root):
     for i in tqdm(range(target_csv.shape[0]), "processing heavy: {}".format(n_heavy)):
         this_info = Gauss16Info(qm_sdf=opt_sdf[i], dipole=extra_target["dipole"][i],
                                 prop_dict_raw=target_csv.iloc[i].to_dict())
-        data_list.append(this_info.get_torch_data())
+        data = this_info.get_torch_data()
+        data_edge = my_pre_transform(data, edge_version="cutoff", do_sort_edge=True, cal_efg=False,
+                                     cutoff=10.0, boundary_factor=100., use_center=True, mol=None, cal_3body_term=False,
+                                     bond_atom_sep=False, record_long_range=True)
+        data_list.append(data_edge)
 
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
                osp.join(dst_root, "frag20_{}_raw.pt".format(n_heavy)))
