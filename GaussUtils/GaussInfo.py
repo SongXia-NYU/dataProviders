@@ -67,8 +67,9 @@ class Gauss16Info:
             self._get_mulliken_charges()
             # calculate dipole
             self._get_dipole()
-        # subtract reference energy
-        self._prop_ref()
+        if log_path is None:
+            # subtract reference energy
+            self._prop_ref()
 
     def _read_prop(self):
         """
