@@ -38,7 +38,8 @@ class Gauss16Info:
         if not self.normal_termination:
             return
 
-        self.base_name = osp.basename(log_path).split(".")[0]
+        self.base_name = osp.basename(log_path).split(".")[0]\
+            if log_path is not None else osp.basename(qm_sdf).split(".")[0]
         self.dir = osp.dirname(log_path)
 
         self.mmff_sdf = mmff_sdf
