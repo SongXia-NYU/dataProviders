@@ -40,7 +40,7 @@ class Gauss16Info:
 
         self.base_name = osp.basename(log_path).split(".")[0]\
             if log_path is not None else osp.basename(qm_sdf).split(".")[0]
-        self.dir = osp.dirname(log_path)
+        self.dir = osp.dirname(log_path) if log_path is not None else osp.dirname(qm_sdf)
 
         self.mmff_sdf = mmff_sdf
         self.mmff_lines = open(mmff_sdf).readlines() if mmff_sdf is not None else None
