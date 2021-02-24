@@ -227,24 +227,24 @@ def read_gauss_log(input_file, output_path):
         torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path+".pt")
 
 
-def sdf_to_pt():
+def sdf_to_pt(n_heavy, src_root, dst_root):
     # TODO
     data_list = []
 
-    n_heavy = 20
-    target_csv_f = osp.join("Frag20_{}_target.csv".format(n_heavy, n_heavy))
-    extra_target_f = osp.join("Frag20_{}_extra_target.pt".format(n_heavy))
+    target_csv_f = osp.join(src_root, "Frag20_{}_target.csv".format(n_heavy, n_heavy))
+    extra_target_f = osp.join(src_root, "Frag20_{}_extra_target.pt".format(n_heavy))
     extra_target = torch.load(extra_target_f)
     target_csv = pd.read_csv(target_csv_f)
     indexes = target_csv["index"].values.reshape(-1).tolist()
-    opt_sdf = [osp.join("Frag20_{}_data".format(n_heavy), "{}.opt.sdf".format(i)) for i in indexes]
+    opt_sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}.opt.sdf".format(i)) for i in indexes]
 
-    for i in tqdm(range(target_csv.shape[0])):
+    for i in tqdm(range(target_csv.shape[0]), "processing heavy: {}".format(n_heavy)):
         this_info = Gauss16Info(qm_sdf=opt_sdf[i], dipole=extra_target["dipole"][i],
                                 prop_dict_raw=target_csv.iloc[i].to_dict())
         data_list.append(this_info.get_torch_data())
 
-    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), "frag20_{}_raw.pt")
+    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
+               osp.join(dst_root, "frag20_{}_raw.pt".format(n_heavy)))
 
 
 if __name__ == '__main__':
