@@ -239,8 +239,14 @@ def sdf_to_pt(n_heavy, src_root, dst_root):
     extra_target_f = osp.join(src_root, "Frag20_{}_extra_target.pt".format(n_heavy))
     extra_target = torch.load(extra_target_f)
     target_csv = pd.read_csv(target_csv_f)
-    indexes = target_csv["index"].values.reshape(-1).tolist()
-    opt_sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}.opt.sdf".format(i)) for i in indexes]
+    if n_heavy >= 10:
+        indexes = target_csv["index"].values.reshape(-1).tolist()
+        opt_sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}.opt.sdf".format(i)) for i in indexes]
+    else:
+        indexes = target_csv["index"].values.reshape(-1).tolist()
+        sources = target_csv["source"].values.reshape(-1).tolist()
+        opt_sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}".format(s), "{}.opt.sdf".format(i))
+                   for i, s in zip(indexes, sources)]
 
     for i in tqdm(range(target_csv.shape[0]), "processing heavy: {}".format(n_heavy)):
         this_info = Gauss16Info(qm_sdf=opt_sdf[i], dipole=extra_target["dipole"][i],
