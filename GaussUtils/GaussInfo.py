@@ -217,7 +217,7 @@ class Gauss16Info:
         return Data(**_tmp_data)
 
 
-def read_gauss_log(input_file, output_path, indexes=None):
+def read_gauss_log(input_file, output_path, indexes, gauss_version):
     if indexes is not None:
         log_files = [input_file.format(i) for i in indexes]
     else:
@@ -225,7 +225,7 @@ def read_gauss_log(input_file, output_path, indexes=None):
     result_csv = pd.DataFrame()
     data_list = []
     for log_file in tqdm(log_files):
-        info = Gauss16Info(log_path=log_file)
+        info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
         result_csv = result_csv.append(info.get_data_frame())
         data_list.append(info.get_torch_data())
 
@@ -273,9 +273,10 @@ if __name__ == '__main__':
     parser.add_argument("--input_file", type=str)
     parser.add_argument("--output_file", type=str)
     parser.add_argument("--index_file", type=str, default=None)
+    parser.add_argument("--gauss_version", type=int, default=16)
     args = parser.parse_args()
     if args.index_file is not None:
         _indexes = pd.read_csv(args.index_file)["index"].values.reshape(-1).tolist()
     else:
         _indexes = None
-    read_gauss_log(args.input_file, args.output_file, _indexes)
+    read_gauss_log(args.input_file, args.output_file, _indexes, args.gauss_version)
