@@ -114,7 +114,7 @@ class Gauss16Info:
     def _normal_finishes(self):
         end_list = ["Normal", "termination", "of"] if self.gauss_version == 16 else ["Job", "finishes", "at:"]
 
-        line = self.log_lines[-1]
+        line = self.log_lines[-1] if self.gauss_version == 16 else self.log_lines[-2]
         if line.split()[0:3] == end_list:
             return True
         else:
@@ -225,7 +225,7 @@ def read_gauss_log(input_file, output_path, indexes=None):
     result_csv = pd.DataFrame()
     data_list = []
     for log_file in tqdm(log_files):
-        info = Gauss16Info(log_file)
+        info = Gauss16Info(log_path=log_file)
         result_csv = result_csv.append(info.get_data_frame())
         data_list.append(info.get_torch_data())
 
@@ -275,7 +275,7 @@ if __name__ == '__main__':
     parser.add_argument("--index_file", type=str, default=None)
     args = parser.parse_args()
     if args.index_file is not None:
-        indexes = pd.read_csv(args.index_file)["index"].values.reshape(-1).tolist()
+        _indexes = pd.read_csv(args.index_file)["index"].values.reshape(-1).tolist()
     else:
-        indexes = None
-    read_gauss_log(args.input_file, args.output_file, indexes)
+        _indexes = None
+    read_gauss_log(args.input_file, args.output_file, _indexes)
