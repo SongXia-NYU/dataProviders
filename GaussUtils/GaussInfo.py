@@ -15,7 +15,7 @@ from DataPrepareUtils import my_pre_transform
 
 class Gauss16Info:
     def __init__(self, log_path: str = None, qm_sdf: str = None, mmff_sdf: str = None, dipole: torch.Tensor = None,
-                 prop_dict_raw: dict = None):
+                 prop_dict_raw: dict = None, gauss_version: int = 16):
         """
         Extract information from Gaussian 16 log files OR from SDF files. In the later case, qm_sdf, dipole and
         prop_dict_raw must not be None
@@ -26,6 +26,7 @@ class Gauss16Info:
         :param prop_dict_raw:
         """
         # for conversion of element, which is the atomic number of element
+        self.gauss_version = gauss_version
         self.dipole = dipole
         self._element_dict = {'H': 1, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'P': 15, 'S': 16, 'Cl': 17, 'Br': 35}
         # for conversion of element_p, which is the column and period of element
@@ -38,7 +39,7 @@ class Gauss16Info:
         if not self.normal_termination:
             return
 
-        self.base_name = osp.basename(log_path).split(".")[0]\
+        self.base_name = osp.basename(log_path).split(".")[0] \
             if log_path is not None else osp.basename(qm_sdf).split(".")[0]
         self.dir = osp.dirname(log_path) if log_path is not None else osp.dirname(qm_sdf)
 
@@ -111,8 +112,10 @@ class Gauss16Info:
                 self.prop_dict_raw['E'] = float(line.split()[4]) * self.hartree2ev
 
     def _normal_finishes(self):
+        end_list = ["Normal", "termination", "of"] if self.gauss_version == 16 else ["Job", "finishes", "at:"]
+
         line = self.log_lines[-1]
-        if line.split()[0:3] == ["Normal", "termination", "of"]:
+        if line.split()[0:3] == end_list:
             return True
         else:
             return False
@@ -214,8 +217,11 @@ class Gauss16Info:
         return Data(**_tmp_data)
 
 
-def read_gauss_log(input_file, output_path):
-    log_files = glob(input_file)
+def read_gauss_log(input_file, output_path, indexes=None):
+    if indexes is not None:
+        log_files = [input_file.format(i) for i in indexes]
+    else:
+        log_files = glob(input_file)
     result_csv = pd.DataFrame()
     data_list = []
     for log_file in tqdm(log_files):
@@ -227,8 +233,8 @@ def read_gauss_log(input_file, output_path):
         result_csv.to_csv(osp.join(output_path, "out.csv"), index=False)
         torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), "out.pt")
     else:
-        result_csv.to_csv(output_path+".csv", index=False)
-        torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path+".pt")
+        result_csv.to_csv(output_path + ".csv", index=False)
+        torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path + ".pt")
 
 
 def sdf_to_pt(n_heavy, src_root, dst_root):
@@ -266,5 +272,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_file", type=str)
     parser.add_argument("--output_file", type=str)
+    parser.add_argument("--index_file", type=str, default=None)
     args = parser.parse_args()
-    read_gauss_log(args.input_file, args.output_file)
+    if args.index_file is not None:
+        indexes = pd.read_csv(args.index_file)["index"].values.reshape(-1).tolist()
+    else:
+        indexes = None
+    read_gauss_log(args.input_file, args.output_file, indexes)
