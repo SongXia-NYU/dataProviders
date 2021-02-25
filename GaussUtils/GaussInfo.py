@@ -37,7 +37,7 @@ class Gauss16Info:
         self.log_lines = open(log_path).readlines() if log_path is not None else None
         self.normal_termination = self._normal_finishes() if qm_sdf is None else True
         if not self.normal_termination:
-            return
+            print("{} did not terminate normally!!".format(log_path))
 
         self.base_name = osp.basename(log_path).split(".")[0] \
             if log_path is not None else osp.basename(qm_sdf).split(".")[0]
@@ -47,7 +47,8 @@ class Gauss16Info:
         self.mmff_lines = open(mmff_sdf).readlines() if mmff_sdf is not None else None
         if qm_sdf is None:
             qm_sdf = osp.join(self.dir, self.base_name + ".qm.sdf")
-            os.system("obabel -ig16 {} -osdf -O {}".format(log_path, qm_sdf))
+            if not osp.exists(qm_sdf):
+                os.system("obabel -ig16 {} -osdf -O {}".format(log_path, qm_sdf))
         self.qm_sdf = qm_sdf
         self.qm_lines = open(qm_sdf).readlines()
 
@@ -114,11 +115,10 @@ class Gauss16Info:
     def _normal_finishes(self):
         end_list = ["Normal", "termination", "of"] if self.gauss_version == 16 else ["Job", "finishes", "at:"]
 
-        line = self.log_lines[-1] if self.gauss_version == 16 else self.log_lines[-2]
-        if line.split()[0:3] == end_list:
-            return True
-        else:
-            return False
+        for line in self.log_lines[-10:]:
+            if line.split()[0:3] == end_list:
+                return True
+        return False
 
     def _get_elements(self):
         """ Get elements infor for both atomic number, and periodic based """
