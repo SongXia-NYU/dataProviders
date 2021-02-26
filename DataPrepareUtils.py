@@ -409,5 +409,6 @@ def concat_im_datasets(root: str, datasets: List[str], out_name: str):
         dummy_dataset = DummyIMDataset(root, dataset)
         for i in tqdm(range(len(dummy_dataset)), dataset):
             data_list.append(dummy_dataset[i])
+    print("saving... it is recommended to have 32GB memory")
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
                osp.join(root, "processed", out_name))
