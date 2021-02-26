@@ -16,6 +16,10 @@ if __name__ == '__main__':
         prev_n += len(this_train) + len(this_test)
     train_index = torch.cat(train_index)
     test_index = torch.cat(test_index)
+    frag20_jl_size = len(train_index) + len(test_index)
+    eMol9_size = 88234
+    torch.save({"train_index": torch.cat([train_index, torch.arange(frag20_jl_size, frag20_jl_size+eMol9_size)]),
+                "test_index": test_index}, "frag20_eMol9_split.pt")
 
     j2d_map = torch.load("jianing_to_dongdong_merge.pt")
     j2d_index_map = torch.where(j2d_map == 0, -1, j2d_map)
