@@ -1,15 +1,18 @@
 import time
+from typing import List
 
 import numpy as np
 import pandas as pd
 import torch
 import os.path as osp
 
+import torch_geometric
 from scipy.spatial import Voronoi
 from torch_geometric.data import Data
 from rdkit.Chem.inchi import MolToInchi
 from ase.units import Hartree, eV
 
+from DummyIMDataset import DummyIMDataset
 from utils.utils_functions import cal_edge
 from tqdm import tqdm
 
@@ -398,3 +401,13 @@ def subtract_ref(dataset, save_path, use_jianing_ref=True):
             energy -= total_ref
 
     torch.save((dataset.data, dataset.slices), save_path)
+
+
+def concat_im_datasets(root: str, datasets: List[str], out_name: str):
+    data_list = []
+    for dataset in datasets:
+        dummy_dataset = DummyIMDataset(root, dataset)
+        for i in tqdm(range(len(dummy_dataset)), dataset):
+            data_list.append(dummy_dataset[i])
+    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
+               osp.join(root, "processed", out_name))

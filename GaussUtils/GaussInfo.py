@@ -268,6 +268,26 @@ def sdf_to_pt(n_heavy, src_root, dst_root):
                osp.join(dst_root, "frag20_{}_raw.pt".format(n_heavy)))
 
 
+def sdf_to_pt_eMol9(src_root, dst_root):
+    target_csv_f = osp.join(src_root, "eMol9_target.csv")
+    extra_target_f = osp.join(src_root, "eMol9_extra_target.pt")
+    extra_target = torch.load(extra_target_f)
+    target_csv = pd.read_csv(target_csv_f)
+    indexes = target_csv["index"].values.reshape(-1).tolist()
+    opt_sdf = [osp.join(src_root, "eMol9_data", "{}.qm.sdf".format(i)) for i in indexes]
+
+    data_list = []
+    for i in tqdm(range(target_csv.shape[0])):
+        this_info = Gauss16Info(qm_sdf=opt_sdf[i], dipole=extra_target["dipole"][i],
+                                prop_dict_raw=target_csv.iloc[i].to_dict())
+        data = this_info.get_torch_data()
+        data_edge = my_pre_transform(data, edge_version="cutoff", do_sort_edge=True, cal_efg=False,
+                                     cutoff=10.0, boundary_factor=100., use_center=True, mol=None, cal_3body_term=False,
+                                     bond_atom_sep=False, record_long_range=True)
+        data_list.append(data_edge)
+    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), osp.join(dst_root, "eMol9_raw.pt"))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--input_file", type=str)
