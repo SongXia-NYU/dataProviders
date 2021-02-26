@@ -273,7 +273,7 @@ def sdf_to_pt_eMol9(src_root, dst_root):
     extra_target_f = osp.join(src_root, "eMol9_extra_target.pt")
     extra_target = torch.load(extra_target_f)
     target_csv = pd.read_csv(target_csv_f)
-    indexes = target_csv["index"].values.reshape(-1).tolist()
+    indexes = target_csv["f_name"].values.reshape(-1).tolist()
     opt_sdf = [osp.join(src_root, "eMol9_data", "{}.qm.sdf".format(i)) for i in indexes]
 
     data_list = []
