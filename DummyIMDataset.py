@@ -23,7 +23,7 @@ class DummyIMDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return [self.dataset_name, self.split]
+        return [self.dataset_name, self.split] if self.split is not None else [self.dataset_name]
 
     def download(self):
         pass
