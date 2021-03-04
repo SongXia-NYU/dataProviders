@@ -268,7 +268,7 @@ def sdf_to_pt(n_heavy, src_root, dst_root, geometry="qm"):
         data_list.append(data_edge)
 
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
-               osp.join(dst_root, "frag20_{}_raw.pt".format(n_heavy)))
+               osp.join(dst_root, "frag20_{}_{}_raw.pt".format(n_heavy, geometry)))
 
 
 def sdf_to_pt_eMol9(src_root, dst_root, geometry="qm"):
