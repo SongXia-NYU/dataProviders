@@ -237,7 +237,7 @@ def read_gauss_log(input_file, output_path, indexes, gauss_version):
         torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path + ".pt")
 
 
-def sdf_to_pt(n_heavy, src_root, dst_root):
+def sdf_to_pt(n_heavy, src_root, dst_root, geometry="qm"):
     # TODO
     data_list = []
 
@@ -245,18 +245,21 @@ def sdf_to_pt(n_heavy, src_root, dst_root):
     extra_target_f = osp.join(src_root, "Frag20_{}_extra_target.pt".format(n_heavy))
     extra_target = torch.load(extra_target_f)
     target_csv = pd.read_csv(target_csv_f)
+
+    _f_name = ".opt" if geometry == "qm" else ""
+
     if n_heavy >= 10:
         indexes = target_csv["index"].values.reshape(-1).tolist()
-        opt_sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}.opt.sdf".format(i)) for i in indexes]
+        sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(i, _f_name)) for i in indexes]
     else:
         index_csv = pd.read_csv(osp.join(src_root, "Frag20_{}_index.csv".format(n_heavy, n_heavy)))
         indexes = index_csv["idx"].values.reshape(-1).tolist()
         sources = index_csv["source"].values.reshape(-1).tolist()
-        opt_sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}".format(s), "{}.opt.sdf".format(i))
-                   for i, s in zip(indexes, sources)]
+        sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}".format(s), "{}{}.sdf".format(i, _f_name))
+               for i, s in zip(indexes, sources)]
 
     for i in tqdm(range(target_csv.shape[0]), "processing heavy: {}".format(n_heavy)):
-        this_info = Gauss16Info(qm_sdf=opt_sdf[i], dipole=extra_target["dipole"][i],
+        this_info = Gauss16Info(qm_sdf=sdf[i], dipole=extra_target["dipole"][i],
                                 prop_dict_raw=target_csv.iloc[i].to_dict())
         data = this_info.get_torch_data()
         data_edge = my_pre_transform(data, edge_version="cutoff", do_sort_edge=True, cal_efg=False,
@@ -268,24 +271,25 @@ def sdf_to_pt(n_heavy, src_root, dst_root):
                osp.join(dst_root, "frag20_{}_raw.pt".format(n_heavy)))
 
 
-def sdf_to_pt_eMol9(src_root, dst_root):
+def sdf_to_pt_eMol9(src_root, dst_root, geometry="qm"):
     target_csv_f = osp.join(src_root, "eMol9_target.csv")
     extra_target_f = osp.join(src_root, "eMol9_extra_target.pt")
     extra_target = torch.load(extra_target_f)
     target_csv = pd.read_csv(target_csv_f)
     indexes = target_csv["f_name"].values.reshape(-1).tolist()
-    opt_sdf = [osp.join(src_root, "eMol9_data", "{}.qm.sdf".format(i)) for i in indexes]
+    sdf = [osp.join(src_root, "eMol9_data", "{}.{}.sdf".format(i, geometry)) for i in indexes]
 
     data_list = []
     for i in tqdm(range(target_csv.shape[0])):
-        this_info = Gauss16Info(qm_sdf=opt_sdf[i], dipole=extra_target["dipole"][i],
+        this_info = Gauss16Info(qm_sdf=sdf[i], dipole=extra_target["dipole"][i],
                                 prop_dict_raw=target_csv.iloc[i].to_dict())
         data = this_info.get_torch_data()
         data_edge = my_pre_transform(data, edge_version="cutoff", do_sort_edge=True, cal_efg=False,
                                      cutoff=10.0, boundary_factor=100., use_center=True, mol=None, cal_3body_term=False,
                                      bond_atom_sep=False, record_long_range=True)
         data_list.append(data_edge)
-    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), osp.join(dst_root, "eMol9_raw.pt"))
+    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
+               osp.join(dst_root, "eMol9_raw_{}.pt".format(geometry)))
 
 
 if __name__ == '__main__':
