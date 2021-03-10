@@ -214,6 +214,8 @@ class Gauss16Info:
                      "F": torch.as_tensor([[0., 0., 0.]]).view(-1, 3),
                      "E": torch.as_tensor(self.prop_dict_raw["U0_atom"]).view(-1),
                      "N": torch.as_tensor(self.n_atoms).view(-1)}
+        if "dd_target" in self.prop_dict_raw.keys():
+            _tmp_data.update(self.prop_dict_raw["dd_target"])
         return Data(**_tmp_data)
 
 
@@ -237,8 +239,57 @@ def read_gauss_log(input_file, output_path, indexes, gauss_version):
         torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path + ".pt")
 
 
+def preprocess_frag20_sol():
+    geometry = "qm"
+    dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
+    train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
+    valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
+    test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
+    # concatenate them in this order
+    concat_csv = pd.concat([train_csv, valid_csv, test_csv])
+
+    jl_root = "/ext3"
+    extra_info_heavy = {i: torch.load(osp.join(jl_root, "Frag20_{}_extra_target.pt".format(i))) for i in range(9, 21)}
+    tgt_info_heavy = {i: torch.load(osp.join(jl_root, "Frag20_{}_target.csv".format(i))) for i in range(9, 21)}
+    # different naming for different geometries
+    ext = ".opt" if geometry == "qm" else ""
+
+    save_root = "/scratch/sx801/data/Frag20-Sol"
+    os.makedirs(save_root, exist_ok=True)
+
+    data_list = []
+    for i in tqdm(range(concat_csv.shape[0])):
+        this_id = int(concat_csv["ID"][i])
+        this_source = concat_csv["SourceFile"][i]
+        n_heavy = 9 if this_source == "less10" else int(this_source)
+
+        tgt_dict = tgt_info_heavy[n_heavy].iloc[i].to_dict()
+        for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
+            tgt_dict[name] = torch.as_tensor(concat_csv[name][i]).view(-1)
+
+        this_info = Gauss16Info(qm_sdf=osp.join(jl_root, "Frag20_{}_data".format(n_heavy),
+                                                "{}{}.sdf".format(this_id, ext)),
+                                dipole=extra_info_heavy[n_heavy]["dipole"][i], prop_dict_raw=tgt_dict)
+        data = this_info.get_torch_data()
+        data_edge = my_pre_transform(data, edge_version="cutoff", do_sort_edge=True, cal_efg=False,
+                                     cutoff=10.0, boundary_factor=100., use_center=True, mol=None, cal_3body_term=False,
+                                     bond_atom_sep=False, record_long_range=True)
+        data_list.append(data_edge)
+
+    print("collating and saving...")
+    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
+               osp.join(save_root, "frag20_sol_{}_cutoff-10.pt".format(geometry)))
+
+
 def sdf_to_pt(n_heavy, src_root, dst_root, geometry="qm"):
-    # TODO
+    """
+    Preprocess Frag20 dataset into PyTorch geometric format
+    :param n_heavy:
+    :param src_root:
+    :param dst_root:
+    :param geometry:
+    :return:
+    """
     data_list = []
 
     target_csv_f = osp.join(src_root, "Frag20_{}_target.csv".format(n_heavy, n_heavy))
