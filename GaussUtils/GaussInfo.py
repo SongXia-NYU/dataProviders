@@ -259,8 +259,8 @@ def preprocess_frag20_sol():
 
     data_list = []
     for i in tqdm(range(concat_csv.shape[0])):
-        this_id = int(concat_csv["ID"][i])
-        this_source = concat_csv["SourceFile"][i]
+        this_id = int(concat_csv["ID"][i].item())
+        this_source = concat_csv["SourceFile"][i].item()
         n_heavy = 9 if this_source == "less10" else int(this_source)
 
         tgt_dict = tgt_info_heavy[n_heavy].iloc[i].to_dict()
