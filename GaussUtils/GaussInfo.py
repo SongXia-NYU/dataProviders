@@ -259,13 +259,13 @@ def preprocess_frag20_sol():
 
     data_list = []
     for i in tqdm(range(concat_csv.shape[0])):
-        this_id = int(concat_csv["ID"][i].item())
-        this_source = concat_csv["SourceFile"][i].item()
+        this_id = int(concat_csv["ID"].iloc[i].item())
+        this_source = concat_csv["SourceFile"].iloc[i].item()
         n_heavy = 9 if this_source == "less10" else int(this_source)
 
         tgt_dict = tgt_info_heavy[n_heavy].iloc[i].to_dict()
         for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
-            tgt_dict[name] = torch.as_tensor(concat_csv[name][i]).view(-1)
+            tgt_dict[name] = torch.as_tensor(concat_csv[name].iloc[i]).view(-1)
 
         this_info = Gauss16Info(qm_sdf=osp.join(jl_root, "Frag20_{}_data".format(n_heavy),
                                                 "{}{}.sdf".format(this_id, ext)),
