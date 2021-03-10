@@ -252,7 +252,12 @@ def preprocess_frag20_sol():
     extra_info_heavy = {i: torch.load(osp.join(jl_root, "Frag20_{}_extra_target.pt".format(i))) for i in range(9, 21)}
     tgt_info_heavy = {i: pd.read_csv(osp.join(jl_root, "Frag20_{}_target.csv".format(i))) for i in range(9, 21)}
     # different naming for different geometries
-    ext = ".opt" if geometry == "qm" else ""
+    frag20_ext = ".opt" if geometry == "qm" else ""
+    cccd_ext = ".opt" if geometry == "qm" else "_min"
+
+    ccdc_root = "/scratch/sx801/data/CSD20/CSD20/CSD20_data"
+    ccdc_extra_target = torch.load("/scratch/sx801/data/CSD20/CSD20/CSD20_extra_target.pt")
+    ccdc_target = pd.read_csv("/scratch/sx801/data/CSD20/CSD20/CSD20_target.csv")
 
     save_root = "/scratch/sx801/data/Frag20-Sol"
     os.makedirs(save_root, exist_ok=True)
@@ -261,15 +266,26 @@ def preprocess_frag20_sol():
     for i in tqdm(range(concat_csv.shape[0])):
         this_id = int(concat_csv["ID"].iloc[i])
         this_source = concat_csv["SourceFile"].iloc[i]
-        n_heavy = 9 if this_source == "less10" else int(this_source)
+        if this_source == "ccdc":
+            tgt_dict = ccdc_target.iloc[i].to_dict()
+            sdf_file = osp.join(ccdc_root, "{}{}.sdf".format(this_id, cccd_ext))
+            dipole = ccdc_extra_target["dipole"][i]
+        else:
+            n_heavy = 9 if this_source == "less10" else int(this_source)
 
-        tgt_dict = tgt_info_heavy[n_heavy].iloc[i].to_dict()
+            tgt_dict = tgt_info_heavy[n_heavy].iloc[i].to_dict()
+            if n_heavy > 9:
+                sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(this_id, frag20_ext))
+            else:
+                sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "pubchem",
+                                    "{}{}.sdf".format(this_id, frag20_ext))
+            dipole = extra_info_heavy[n_heavy]["dipole"][i]
+
         for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
             tgt_dict[name] = torch.as_tensor(concat_csv[name].iloc[i]).view(-1)
 
-        this_info = Gauss16Info(qm_sdf=osp.join(jl_root, "Frag20_{}_data".format(n_heavy),
-                                                "{}{}.sdf".format(this_id, ext)),
-                                dipole=extra_info_heavy[n_heavy]["dipole"][i], prop_dict_raw=tgt_dict)
+        this_info = Gauss16Info(qm_sdf=sdf_file, dipole=dipole, prop_dict_raw=tgt_dict)
+
         data = this_info.get_torch_data()
         data_edge = my_pre_transform(data, edge_version="cutoff", do_sort_edge=True, cal_efg=False,
                                      cutoff=10.0, boundary_factor=100., use_center=True, mol=None, cal_3body_term=False,
@@ -279,6 +295,14 @@ def preprocess_frag20_sol():
     print("collating and saving...")
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
                osp.join(save_root, "frag20_sol_{}_cutoff-10.pt".format(geometry)))
+
+    train_size = train_csv.shape[0]
+    valid_size = valid_csv.shape[0]
+    test_size = test_csv.shape[0]
+    torch.save({"train_index": torch.arange(train_size),
+                "valid_index": torch.arange(train_size, train_size+valid_size),
+                "test_index": torch.arange(train_size+valid_size, train_size+valid_size+test_size)},
+               osp.join(save_root, "frag20_sol_split_03102021.pt"))
 
 
 def sdf_to_pt(n_heavy, src_root, dst_root, geometry="qm"):

@@ -11,11 +11,15 @@ class DummyIMDataset(InMemoryDataset):
         self.train_index, self.val_index, self.test_index = None, None, None
         if split is not None:
             split_data = torch.load(self.processed_paths[1])
-            train_index = split_data["train_index"]
-            perm_matrix = torch.randperm(len(train_index))
-            self.train_index = train_index[perm_matrix[:-1000]]
-            self.val_index = train_index[perm_matrix[-1000:]]
             self.test_index = split_data["test_index"]
+            if "valid_index" not in split:
+                train_index = split_data["train_index"]
+                perm_matrix = torch.randperm(len(train_index))
+                self.train_index = train_index[perm_matrix[:-1000]]
+                self.val_index = train_index[perm_matrix[-1000:]]
+            else:
+                self.train_index = split_data["train_index"]
+                self.val_index = split_data["valid_index"]
 
     @property
     def raw_file_names(self):
@@ -30,5 +34,3 @@ class DummyIMDataset(InMemoryDataset):
 
     def process(self):
         pass
-
-
