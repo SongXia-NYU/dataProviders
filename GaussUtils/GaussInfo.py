@@ -250,7 +250,7 @@ def preprocess_frag20_sol():
 
     jl_root = "/ext3"
     extra_info_heavy = {i: torch.load(osp.join(jl_root, "Frag20_{}_extra_target.pt".format(i))) for i in range(9, 21)}
-    tgt_info_heavy = {i: torch.load(osp.join(jl_root, "Frag20_{}_target.csv".format(i))) for i in range(9, 21)}
+    tgt_info_heavy = {i: pd.read_csv(osp.join(jl_root, "Frag20_{}_target.csv".format(i))) for i in range(9, 21)}
     # different naming for different geometries
     ext = ".opt" if geometry == "qm" else ""
 
