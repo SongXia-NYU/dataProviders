@@ -350,8 +350,9 @@ if __name__ == '__main__':
     parser.add_argument("--index_file", type=str, default=None)
     parser.add_argument("--gauss_version", type=int, default=16)
     args = parser.parse_args()
-    if args.index_file is not None:
-        _indexes = pd.read_csv(args.index_file)["index"].values.reshape(-1).tolist()
-    else:
-        _indexes = None
-    read_gauss_log(args.input_file, args.output_file, _indexes, args.gauss_version)
+    # if args.index_file is not None:
+    #     _indexes = pd.read_csv(args.index_file)["index"].values.reshape(-1).tolist()
+    # else:
+    #     _indexes = None
+    # read_gauss_log(args.input_file, args.output_file, _indexes, args.gauss_version)
+    preprocess_frag20_sol()
