@@ -269,13 +269,13 @@ def preprocess_frag20_sol():
         this_source = concat_csv["SourceFile"].iloc[i]
         if this_source == "ccdc":
             mask = (ccdc_target["index"] == this_id).values.reshape(-1)
-            tgt_dict = ccdc_target.loc[mask].to_dict()
+            tgt_dict = ccdc_target.loc[mask].iloc[0].to_dict()
             sdf_file = osp.join(ccdc_root, "{}{}.sdf".format(this_id, cccd_ext))
             dipole = ccdc_extra_target["dipole"][mask]
         else:
             n_heavy = 9 if this_source == "less10" else int(this_source)
             mask = (tgt_info_heavy[n_heavy]["index"] == this_id).values.reshape(-1)
-            tgt_dict = tgt_info_heavy[n_heavy].loc[mask].to_dict()
+            tgt_dict = tgt_info_heavy[n_heavy].iloc[0].loc[mask].to_dict()
             if n_heavy > 9:
                 sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(this_id, frag20_ext))
             else:
