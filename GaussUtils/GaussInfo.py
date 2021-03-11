@@ -267,19 +267,19 @@ def preprocess_frag20_sol():
         this_id = int(concat_csv["ID"].iloc[i])
         this_source = concat_csv["SourceFile"].iloc[i]
         if this_source == "ccdc":
-            tgt_dict = ccdc_target.iloc[i].to_dict()
+            tgt_dict = ccdc_target.iloc[this_id].to_dict()
             sdf_file = osp.join(ccdc_root, "{}{}.sdf".format(this_id, cccd_ext))
-            dipole = ccdc_extra_target["dipole"][i]
+            dipole = ccdc_extra_target["dipole"][this_id]
         else:
             n_heavy = 9 if this_source == "less10" else int(this_source)
 
-            tgt_dict = tgt_info_heavy[n_heavy].iloc[i].to_dict()
+            tgt_dict = tgt_info_heavy[n_heavy].iloc[this_id].to_dict()
             if n_heavy > 9:
                 sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(this_id, frag20_ext))
             else:
                 sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "pubchem",
                                     "{}{}.sdf".format(this_id, frag20_ext))
-            dipole = extra_info_heavy[n_heavy]["dipole"][i]
+            dipole = extra_info_heavy[n_heavy]["dipole"][this_id]
 
         for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
             tgt_dict[name] = torch.as_tensor(concat_csv[name].iloc[i]).view(-1)
