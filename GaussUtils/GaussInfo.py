@@ -250,14 +250,15 @@ def preprocess_frag20_sol():
 
     jl_root = "/ext3"
     extra_info_heavy = {i: torch.load(osp.join(jl_root, "Frag20_{}_extra_target.pt".format(i))) for i in range(9, 21)}
-    tgt_info_heavy = {i: pd.read_csv(osp.join(jl_root, "Frag20_{}_target.csv".format(i))) for i in range(9, 21)}
+    tgt_info_heavy = {i: pd.read_csv(osp.join(jl_root, "Frag20_{}_target.csv".format(i))).set_index("index")
+                      for i in range(9, 21)}
     # different naming for different geometries
     frag20_ext = ".opt" if geometry == "qm" else ""
     cccd_ext = ".opt" if geometry == "qm" else "_min"
 
     ccdc_root = "/scratch/sx801/data/CSD20/CSD20/CSD20_data"
     ccdc_extra_target = torch.load("/scratch/sx801/data/CSD20/CSD20/CSD20_extra_target.pt")
-    ccdc_target = pd.read_csv("/scratch/sx801/data/CSD20/CSD20/CSD20_target.csv")
+    ccdc_target = pd.read_csv("/scratch/sx801/data/CSD20/CSD20/CSD20_target.csv").set_index("index")
 
     save_root = "/scratch/sx801/data/Frag20-Sol"
     os.makedirs(save_root, exist_ok=True)
@@ -267,19 +268,20 @@ def preprocess_frag20_sol():
         this_id = int(concat_csv["ID"].iloc[i])
         this_source = concat_csv["SourceFile"].iloc[i]
         if this_source == "ccdc":
-            tgt_dict = ccdc_target.iloc[this_id].to_dict()
+            mask = (ccdc_target["index"] == this_id).values.reshape(-1)
+            tgt_dict = ccdc_target.loc[mask].to_dict()
             sdf_file = osp.join(ccdc_root, "{}{}.sdf".format(this_id, cccd_ext))
-            dipole = ccdc_extra_target["dipole"][this_id]
+            dipole = ccdc_extra_target["dipole"][mask]
         else:
             n_heavy = 9 if this_source == "less10" else int(this_source)
-
-            tgt_dict = tgt_info_heavy[n_heavy].iloc[this_id].to_dict()
+            mask = (tgt_info_heavy[n_heavy]["index"] == this_id).values.reshape(-1)
+            tgt_dict = tgt_info_heavy[n_heavy].loc[mask].to_dict()
             if n_heavy > 9:
                 sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(this_id, frag20_ext))
             else:
                 sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "pubchem",
                                     "{}{}.sdf".format(this_id, frag20_ext))
-            dipole = extra_info_heavy[n_heavy]["dipole"][this_id]
+            dipole = extra_info_heavy[n_heavy]["dipole"][mask]
 
         for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
             tgt_dict[name] = torch.as_tensor(concat_csv[name].iloc[i]).view(-1)
