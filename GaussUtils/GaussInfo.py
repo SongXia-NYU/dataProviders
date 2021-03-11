@@ -283,8 +283,11 @@ def preprocess_frag20_sol():
                                     "{}{}.sdf".format(this_id, frag20_ext))
             dipole = extra_info_heavy[n_heavy]["dipole"][mask]
 
+        tmp = {}
         for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
-            tgt_dict[name] = torch.as_tensor(concat_csv[name].iloc[i]).view(-1)
+            tmp[name] = torch.as_tensor(concat_csv[name].iloc[i]).view(-1)
+        tgt_dict["dd_target"] = tmp
+        print(tgt_dict)
 
         this_info = Gauss16Info(qm_sdf=sdf_file, dipole=dipole, prop_dict_raw=tgt_dict)
 
