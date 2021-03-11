@@ -12,7 +12,7 @@ class DummyIMDataset(InMemoryDataset):
         if split is not None:
             split_data = torch.load(self.processed_paths[1])
             self.test_index = split_data["test_index"]
-            if "valid_index" not in split:
+            if "valid_index" not in split_data:
                 train_index = split_data["train_index"]
                 perm_matrix = torch.randperm(len(train_index))
                 self.train_index = train_index[perm_matrix[:-1000]]
