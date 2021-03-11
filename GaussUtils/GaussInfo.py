@@ -275,7 +275,7 @@ def preprocess_frag20_sol():
         else:
             n_heavy = 9 if this_source == "less10" else int(this_source)
             mask = (tgt_info_heavy[n_heavy]["index"] == this_id).values.reshape(-1)
-            tgt_dict = tgt_info_heavy[n_heavy].iloc[0].loc[mask].to_dict()
+            tgt_dict = tgt_info_heavy[n_heavy].loc[mask].iloc[0].to_dict()
             if n_heavy > 9:
                 sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(this_id, frag20_ext))
             else:
