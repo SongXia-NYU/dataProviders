@@ -16,8 +16,13 @@ from GaussUtils.GaussInfo import Gauss16Info
 
 
 def free_solv_sdfs():
-    data = pd.read_csv("raw/freesolv.csv")
-    runGenerator(data.index.tolist(), data["cano_smiles"].tolist(), "freesolv", "raw/freesolv_confs")
+    dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
+    train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
+    valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
+    test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
+    # concatenate them in this order
+    concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True)
+    runGenerator(concat_csv.index.tolist(), concat_csv["SMILES"].tolist(), "solvation", "/ext3/mmff_generated")
 
 
 def mmff_min_sdfs():

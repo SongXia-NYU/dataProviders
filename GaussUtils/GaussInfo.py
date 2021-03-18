@@ -309,7 +309,7 @@ def preprocess_frag20_sol():
     torch.save({"train_index": torch.arange(train_size),
                 "valid_index": torch.arange(train_size, train_size+valid_size),
                 "test_index": torch.arange(train_size+valid_size, train_size+valid_size+test_size)},
-               osp.join(save_root, "frag20_sol_split_03102021.pt"))
+               osp.join(save_root, "frag20_sol_split_03182021.pt"))
 
 
 def sdf_to_pt(n_heavy, src_root, dst_root, geometry="qm"):
