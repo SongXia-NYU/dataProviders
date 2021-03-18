@@ -28,10 +28,11 @@ class Gauss16Info:
         # for conversion of element, which is the atomic number of element
         self.gauss_version = gauss_version
         self.dipole = dipole
-        self._element_dict = {'H': 1, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'P': 15, 'S': 16, 'Cl': 17, 'Br': 35}
+        self._element_dict = {'H': 1, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'P': 15, 'S': 16, 'Cl': 17, 'Br': 35,
+                              'I': 53}
         # for conversion of element_p, which is the column and period of element
         self._element_periodic = {"H": [1, 1], "B": [2, 3], "C": [2, 4], "N": [2, 5], "O": [2, 6], "F": [2, 7],
-                                  "P": [3, 5], "S": [3, 6], "Cl": [3, 7], "Br": [4, 7]}
+                                  "P": [3, 5], "S": [3, 6], "Cl": [3, 7], "Br": [4, 7], "I": [5, 17]}
 
         self.log_path = log_path
         self.log_lines = open(log_path).readlines() if log_path is not None else None
@@ -64,7 +65,7 @@ class Gauss16Info:
         self._get_elements()
         # get coordinates of the elements from .sdf file
         self._get_coordinates()
-        if self.dipole is None:
+        if (self.dipole is None) and (log_path is not None):
             # get mulliken charge from log file
             self._get_mulliken_charges()
             # calculate dipole
@@ -210,10 +211,12 @@ class Gauss16Info:
         _tmp_data = {"R": torch.as_tensor(self.qm_coords).view(-1, 3),
                      "Z": torch.as_tensor(self.elements).view(-1),
                      "Q": torch.as_tensor([0.]).view(-1),
-                     "D": torch.as_tensor(self.dipole).view(-1, 3),
                      "F": torch.as_tensor([[0., 0., 0.]]).view(-1, 3),
-                     "E": torch.as_tensor(self.prop_dict_raw["U0_atom"]).view(-1),
                      "N": torch.as_tensor(self.n_atoms).view(-1)}
+        if self.dipole is not None:
+            _tmp_data["D"] = torch.as_tensor(self.dipole).view(-1, 3)
+        if "U0_atom" in self.prop_dict_raw:
+            _tmp_data["E"] = torch.as_tensor(self.prop_dict_raw["U0_atom"]).view(-1)
         if "dd_target" in self.prop_dict_raw.keys():
             _tmp_data.update(self.prop_dict_raw["dd_target"])
         return Data(**_tmp_data)
