@@ -67,5 +67,5 @@ def convert_pt():
 
 
 if __name__ == '__main__':
-    convert_pt()
+    free_solv_sdfs()
     print("finished")
