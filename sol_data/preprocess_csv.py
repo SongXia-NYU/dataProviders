@@ -23,15 +23,15 @@ def free_solv_sdfs():
     # parser.add_argument("--start", type=int)
     # parser.add_argument("--end", type=int)
     # args, _ = parser.parse_known_args()
-    dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
-    train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
-    valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
-    test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
+    # dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
+    # train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
+    # valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
+    # test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
     # concatenate them in this order
-    error_list = torch.load("conf_error_list.pt")
-    concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True).iloc[error_list]
-    runGenerator(concat_csv.index.tolist(), concat_csv["SMILES"].tolist(), "solvation",
-                 "/scratch/sx801/data/sol-frag20-ccdc/mmff_confs")
+    # error_list = torch.load("conf_error_list.pt")
+    # concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True).iloc[error_list]
+    concat_csv = pd.read_csv("lipop.csv")
+    runGenerator(concat_csv.index.tolist(), concat_csv["cano_smiles"].tolist(), "lipop", "raw/lipop_confs")
 
 
 def mmff_min_sdfs():
@@ -64,10 +64,9 @@ def mmff_min_sdfs():
             print("error: {}".format(i))
             error_list.append(i)
 
-    with Pool(10) as p:
-        p.map(convert_conf_to_sdf_i, concat_csv.index.tolist())
-
-    torch.save(error_list, "conf_error_list.pt")
+    for i in concat_csv.index.tolist():
+        convert_conf_to_sdf_i(i)
+    print(error_list)
 
 
 def convert_pt():
