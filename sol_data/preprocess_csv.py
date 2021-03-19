@@ -19,16 +19,17 @@ from GaussUtils.GaussInfo import Gauss16Info
 
 
 def free_solv_sdfs():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--start", type=int)
-    parser.add_argument("--end", type=int)
-    args, _ = parser.parse_known_args()
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--start", type=int)
+    # parser.add_argument("--end", type=int)
+    # args, _ = parser.parse_known_args()
     dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
     train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
     valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
     test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
     # concatenate them in this order
-    concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True).iloc[args.start: args.end]
+    error_list = torch.load("conf_error_list.pt")
+    concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True).iloc[error_list]
     runGenerator(concat_csv.index.tolist(), concat_csv["SMILES"].tolist(), "solvation",
                  "/scratch/sx801/data/sol-frag20-ccdc/mmff_confs")
 
@@ -95,11 +96,5 @@ def convert_pt():
 
 
 if __name__ == '__main__':
-    errors = []
-    for i in tqdm(range(565513)):
-        try:
-            mol = rdkit.Chem.SDMolSupplier("/ext3/mmff_sdfs/{}.mmff.sdf".format(i))
-        except Exception:
-            errors.append(i)
-    torch.save(errors, "conf_error_list.pt")
+    free_solv_sdfs()
     print("finished")
