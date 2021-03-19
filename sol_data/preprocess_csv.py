@@ -11,6 +11,8 @@ import numpy as np
 import os.path as osp
 import torch
 import argparse
+import multiprocess
+from multiprocess.context import Process
 
 from DataPrepareUtils import my_pre_transform
 from GaussUtils.GaussInfo import Gauss16Info
@@ -41,7 +43,8 @@ def mmff_min_sdfs():
     concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True)
     dst_folder = "/ext3/mmff_sdfs/"
     error_list = []
-    for i in tqdm(concat_csv.index.tolist()):
+
+    def process_i(i):
         try:
             f = file_pattern.format(i)
             lowest_e = np.inf
@@ -54,10 +57,15 @@ def mmff_min_sdfs():
                     selected_mol = mol
             w = SDWriter(dst_folder + "/{}.mmff.sdf".format(osp.basename(f).split("_")[0]))
             w.write(selected_mol)
+            print("success: {}".format(i))
         except Exception:
             # too broad exception but who cares?
             print("error: {}".format(i))
             error_list.append(i)
+
+    p = Process(target=process_i, args=tuple(concat_csv.index.tolist()))
+    p.start()
+
     torch.save(error_list, "conf_error_list.pt")
 
 
