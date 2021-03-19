@@ -32,19 +32,32 @@ def free_solv_sdfs():
 
 
 def mmff_min_sdfs():
-    files = glob("raw/freesolv_confs/*_confors.sdf")
-    dst_folder = "raw/freesolv_sdfs"
-    for f in tqdm(files):
-        lowest_e = np.inf
-        selected_mol = None
+    file_pattern = "/scratch/sx801/data/sol-frag20-ccdc/mmff_confs/{}_confors.sdf"
+    dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
+    train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
+    valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
+    test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
+    # concatenate them in this order
+    concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True)
+    dst_folder = "/ext3/mmff_sdfs/"
+    error_list = []
+    for i in tqdm(concat_csv.index.tolist()):
+        try:
+            f = file_pattern.format(i)
+            lowest_e = np.inf
+            selected_mol = None
 
-        suppl = rdkit.Chem.SDMolSupplier(f, removeHs=False)
-        for mol in suppl:
-            prop_dict = mol.GetPropsAsDict()
-            if lowest_e > prop_dict["energy_abs"]:
-                selected_mol = mol
-        w = SDWriter(dst_folder + "/{}.mmff.sdf".format(osp.basename(f).split("_")[0]))
-        w.write(selected_mol)
+            suppl = rdkit.Chem.SDMolSupplier(f, removeHs=False)
+            for mol in suppl:
+                prop_dict = mol.GetPropsAsDict()
+                if lowest_e > prop_dict["energy_abs"]:
+                    selected_mol = mol
+            w = SDWriter(dst_folder + "/{}.mmff.sdf".format(osp.basename(f).split("_")[0]))
+            w.write(selected_mol)
+        except Exception:
+            # too broad exception but who cares?
+            error_list.append(i)
+    torch.save(error_list, "conf_error_list.pt")
 
 
 def convert_pt():
@@ -73,5 +86,5 @@ def convert_pt():
 
 
 if __name__ == '__main__':
-    free_solv_sdfs()
+    mmff_min_sdfs()
     print("finished")
