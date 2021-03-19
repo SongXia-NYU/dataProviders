@@ -56,6 +56,7 @@ def mmff_min_sdfs():
             w.write(selected_mol)
         except Exception:
             # too broad exception but who cares?
+            print("error: {}".format(i))
             error_list.append(i)
     torch.save(error_list, "conf_error_list.pt")
 
