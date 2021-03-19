@@ -12,7 +12,7 @@ import os.path as osp
 import torch
 import argparse
 import multiprocess
-from multiprocess.context import Process
+from multiprocess.pool import Pool
 
 from DataPrepareUtils import my_pre_transform
 from GaussUtils.GaussInfo import Gauss16Info
@@ -63,8 +63,8 @@ def mmff_min_sdfs():
             print("error: {}".format(i))
             error_list.append(i)
 
-    p = Process(target=process_i, args=tuple(concat_csv.index.tolist()))
-    p.start()
+    with Pool(10) as p:
+        p.map(process_i, concat_csv.index.tolist())
 
     torch.save(error_list, "conf_error_list.pt")
 
