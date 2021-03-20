@@ -8,7 +8,8 @@ import torch
 
 def _run_generator(i):
 
-    runGenerator(i, concat_csv["SMILES"].tolist()[i], "sol", "/scratch/sx801/data/sol-frag20-ccdc/mmff_confs/")
+    runGenerator([error_list[i]], [concat_csv["SMILES"].tolist()[i]],
+                 "sol", "/scratch/sx801/data/sol-frag20-ccdc/mmff_confs/")
 
 
 if __name__ == '__main__':
@@ -17,7 +18,7 @@ if __name__ == '__main__':
     valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
     test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
     # concatenate them in this order
-    error_list = torch.load("conf_error_list.pt")[160:]
+    error_list = torch.load("conf_error_list.pt")
     concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True).iloc[error_list]
     with Pool(20) as p:
-        p.map(_run_generator, concat_csv.index.tolist())
+        p.map(_run_generator, range(len(error_list)))
