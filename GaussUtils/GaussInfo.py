@@ -28,11 +28,15 @@ class Gauss16Info:
         # for conversion of element, which is the atomic number of element
         self.gauss_version = gauss_version
         self.dipole = dipole
-        self._element_dict = {'H': 1, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'P': 15, 'S': 16, 'Cl': 17, 'Br': 35,
-                              'I': 53}
+        from mendeleev import get_all_elements
+        self._element_dict = {e.symbol: e.atomic_number for e in get_all_elements()}
+        # self._element_dict = {'H': 1, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'P': 15, 'S': 16, 'Cl': 17, 'Se': 34,
+        #                       'Br': 35, 'I': 53}
         # for conversion of element_p, which is the column and period of element
-        self._element_periodic = {"H": [1, 1], "B": [2, 3], "C": [2, 4], "N": [2, 5], "O": [2, 6], "F": [2, 7],
-                                  "P": [3, 5], "S": [3, 6], "Cl": [3, 7], "Br": [4, 7], "I": [5, 17]}
+        self._element_periodic = {e.symbol: [e.period, e.group.group_id if e.group is not None else None]
+                                  for e in get_all_elements()}
+        # self._element_periodic = {"H": [1, 1], "B": [2, 3], "C": [2, 4], "N": [2, 5], "O": [2, 6], "F": [2, 7],
+        #                           "P": [3, 5], "S": [3, 6], "Cl": [3, 7], "Br": [4, 7], "I": [5, 17], 'Se': [4, 16]}
 
         self.log_path = log_path
         self.log_lines = open(log_path).readlines() if log_path is not None else None
@@ -123,12 +127,18 @@ class Gauss16Info:
 
     def _get_elements(self):
         """ Get elements infor for both atomic number, and periodic based """
-        QMnatoms = int(self.qm_lines[3].split()[0])
+        atoms = []
+        QMnatoms = 0
+        for line in self.qm_lines[4:]:
+            if len(line.strip().split()) == 4:
+                break
+            else:
+                atoms.append(line)
+                QMnatoms += 1
         if self.mmff_lines is not None:
             MMFFnatoms = int(self.mmff_lines[3].split()[0])
             assert QMnatoms == MMFFnatoms, "Error: different number of atoms in mmff and qm optimized files"
         self.n_atoms = QMnatoms
-        atoms = self.qm_lines[4:self.n_atoms + 4]
         elements = []
         elements_p = []
         for atom in atoms:
