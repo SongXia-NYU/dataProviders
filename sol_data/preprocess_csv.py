@@ -31,38 +31,32 @@ def free_solv_sdfs():
 
 
 def mmff_min_sdfs():
-    file_pattern = "/scratch/sx801/data/sol-frag20-ccdc/mmff_confs/{}_confors.sdf"
-    dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
-    train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
-    valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
-    test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
+    file_pattern = "/scratch/sx801/scripts/physnet-dimenet/dataProviders/sol_data/raw/lipop_confs/{}_confors.sdf"
+    # dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
+    # train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
+    # valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
+    # test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
     # concatenate them in this order
-    concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True)
-    dst_folder = "/ext3/mmff_sdfs/"
-    error_list = []
+    # concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True)
 
-    def convert_conf_to_sdf_i(i):
-        try:
-            f = file_pattern.format(i)
-            lowest_e = np.inf
-            selected_mol = None
+    concat_csv = pd.read_csv("lipop.csv")
+    dst_folder = "/scratch/sx801/scripts/physnet-dimenet/dataProviders/sol_data/raw/lipop_sdfs/"
 
-            suppl = rdkit.Chem.SDMolSupplier(f, removeHs=False)
-            for mol in suppl:
-                prop_dict = mol.GetPropsAsDict()
-                if lowest_e > prop_dict["energy_abs"]:
-                    selected_mol = mol
-            w = SDWriter(dst_folder + "/{}.mmff.sdf".format(osp.basename(f).split("_")[0]))
-            w.write(selected_mol)
-            # print("success: {}".format(i))
-        except OSError:
-            error_list.append(i)
+    def convert_conf_to_sdf_i(_i):
+        f = file_pattern.format(_i)
+        lowest_e = np.inf
+        selected_mol = None
 
-    error_list = torch.load("conf_error_list.pt")
-    for i in tqdm(error_list):
+        suppl = rdkit.Chem.SDMolSupplier(f, removeHs=False)
+        for mol in suppl:
+            prop_dict = mol.GetPropsAsDict()
+            if lowest_e > prop_dict["energy_abs"]:
+                selected_mol = mol
+        w = SDWriter(dst_folder + "/{}.mmff.sdf".format(osp.basename(f).split("_")[0]))
+        w.write(selected_mol)
+
+    for i in tqdm(range(concat_csv.shape[0])):
         convert_conf_to_sdf_i(i)
-    print(error_list)
-    torch.save(error_list, "conf_error_list_1.pt")
 
 
 def convert_pt():
