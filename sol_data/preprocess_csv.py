@@ -85,5 +85,5 @@ def convert_pt():
 
 
 if __name__ == '__main__':
-    mmff_min_sdfs()
+    convert_pt()
     print("finished")
