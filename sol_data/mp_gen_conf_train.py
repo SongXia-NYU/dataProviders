@@ -7,7 +7,7 @@ import torch
 
 
 def _run_generator(i):
-
+    print(""+concat_csv["SMILES"].tolist()[i])
     runGenerator([error_list[i]], [concat_csv["SMILES"].tolist()[i]],
                  "sol", "/scratch/sx801/data/sol-frag20-ccdc/mmff_confs/")
 
