@@ -243,13 +243,13 @@ def read_gauss_log(input_file, output_path, indexes, gauss_version):
 
 
 def preprocess_frag20_sol():
-    geometry = "mmff"
+    geometry = "mmff_generated"
     dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
     train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
     valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
     test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
     # concatenate them in this order
-    concat_csv = pd.concat([train_csv, valid_csv, test_csv])
+    concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True)
 
     jl_root = "/ext3"
     extra_info_heavy = {i: torch.load(osp.join(jl_root, "Frag20_{}_extra_target.pt".format(i))) for i in range(9, 21)}
@@ -270,21 +270,27 @@ def preprocess_frag20_sol():
     for i in tqdm(range(concat_csv.shape[0])):
         this_id = int(concat_csv["ID"].iloc[i])
         this_source = concat_csv["SourceFile"].iloc[i]
-        if this_source == "ccdc":
-            mask = (ccdc_target["index"] == this_id).values.reshape(-1)
-            tgt_dict = ccdc_target.loc[mask].iloc[0].to_dict()
-            sdf_file = osp.join(ccdc_root, "{}{}.sdf".format(this_id, cccd_ext))
-            dipole = ccdc_extra_target["dipole"][mask]
-        else:
-            n_heavy = 9 if this_source == "less10" else int(this_source)
-            mask = (tgt_info_heavy[n_heavy]["index"] == this_id).values.reshape(-1)
-            tgt_dict = tgt_info_heavy[n_heavy].loc[mask].iloc[0].to_dict()
-            if n_heavy > 9:
-                sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(this_id, frag20_ext))
+        if geometry in ["qm", "mmff", "mmff_gen"]:
+            if this_source == "ccdc":
+                mask = (ccdc_target["index"] == this_id).values.reshape(-1)
+                tgt_dict = ccdc_target.loc[mask].iloc[0].to_dict()
+                sdf_file = osp.join(ccdc_root, "{}{}.sdf".format(this_id, cccd_ext))
+                dipole = ccdc_extra_target["dipole"][mask]
             else:
-                sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "pubchem",
-                                    "{}{}.sdf".format(this_id, frag20_ext))
-            dipole = extra_info_heavy[n_heavy]["dipole"][mask]
+                n_heavy = 9 if this_source == "less10" else int(this_source)
+                mask = (tgt_info_heavy[n_heavy]["index"] == this_id).values.reshape(-1)
+                tgt_dict = tgt_info_heavy[n_heavy].loc[mask].iloc[0].to_dict()
+                if n_heavy > 9:
+                    sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(this_id, frag20_ext))
+                else:
+                    sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "pubchem",
+                                        "{}{}.sdf".format(this_id, frag20_ext))
+                dipole = extra_info_heavy[n_heavy]["dipole"][mask]
+        else:
+            raise ValueError("invalid geometry: " + geometry)
+
+        if geometry == "mmff_gen":
+            sdf_file = osp.join("/ext3/mmff_generated/{}.mmff.sdf".format(i))
 
         tmp = {}
         for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
