@@ -64,7 +64,8 @@ def mmff_min_sdfs():
             print("error: {}".format(i))
             error_list.append(i)
 
-    for i in concat_csv.index.tolist():
+    error_list = torch.load("conf_error_list.pt")
+    for i in tqdm(error_list):
         convert_conf_to_sdf_i(i)
     print(error_list)
 
@@ -95,5 +96,5 @@ def convert_pt():
 
 
 if __name__ == '__main__':
-    free_solv_sdfs()
+    mmff_min_sdfs()
     print("finished")
