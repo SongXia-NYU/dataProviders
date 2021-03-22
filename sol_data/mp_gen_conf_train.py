@@ -18,7 +18,8 @@ if __name__ == '__main__':
     valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
     test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
     # concatenate them in this order
-    error_list = torch.load("conf_error_list.pt")
+    # error_list = torch.load("conf_error_list.pt")
+    error_list = [1668]
     concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True).iloc[error_list]
     with Pool(20) as p:
         p.map(_run_generator, range(len(error_list)))

@@ -1,18 +1,14 @@
-import rdkit
-import torch_geometric
-from rdkit.Chem import MolFromSmiles
-from rdkit.Chem.AllChem import MMFFOptimizeMolecule, MMFFOptimizeMoleculeConfs
-from rdkit.Chem.rdmolfiles import SDWriter
-from DataGen.genconfs import runGenerator, gen_conformers
-import pandas as pd
-from glob import glob
-from tqdm import tqdm
-import numpy as np
 import os.path as osp
+
+import numpy as np
+import pandas as pd
+import rdkit
 import torch
-import argparse
-import multiprocess
-from multiprocess.pool import Pool
+import torch_geometric
+from DataGen.genconfs import runGenerator
+from rdkit.Chem import MolFromSmiles
+from rdkit.Chem.rdmolfiles import SDWriter
+from tqdm import tqdm
 
 from DataPrepareUtils import my_pre_transform
 from GaussUtils.GaussInfo import Gauss16Info
