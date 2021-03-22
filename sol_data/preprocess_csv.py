@@ -46,23 +46,27 @@ def mmff_min_sdfs():
     error_list = []
 
     def convert_conf_to_sdf_i(i):
-        f = file_pattern.format(i)
-        lowest_e = np.inf
-        selected_mol = None
+        try:
+            f = file_pattern.format(i)
+            lowest_e = np.inf
+            selected_mol = None
 
-        suppl = rdkit.Chem.SDMolSupplier(f, removeHs=False)
-        for mol in suppl:
-            prop_dict = mol.GetPropsAsDict()
-            if lowest_e > prop_dict["energy_abs"]:
-                selected_mol = mol
-        w = SDWriter(dst_folder + "/{}.mmff.sdf".format(osp.basename(f).split("_")[0]))
-        w.write(selected_mol)
-        print("success: {}".format(i))
+            suppl = rdkit.Chem.SDMolSupplier(f, removeHs=False)
+            for mol in suppl:
+                prop_dict = mol.GetPropsAsDict()
+                if lowest_e > prop_dict["energy_abs"]:
+                    selected_mol = mol
+            w = SDWriter(dst_folder + "/{}.mmff.sdf".format(osp.basename(f).split("_")[0]))
+            w.write(selected_mol)
+            # print("success: {}".format(i))
+        except OSError:
+            error_list.append(i)
 
     error_list = torch.load("conf_error_list.pt")
     for i in tqdm(error_list):
         convert_conf_to_sdf_i(i)
     print(error_list)
+    torch.save(error_list, "conf_error_list_1.pt")
 
 
 def convert_pt():
