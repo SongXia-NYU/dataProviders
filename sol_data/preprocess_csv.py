@@ -60,10 +60,10 @@ def mmff_min_sdfs():
 
 
 def convert_pt():
-    sdf_folder = "raw/freesolv_sdfs"
-    target = pd.read_csv("raw/freesolv.csv")
-    dst = "processed/freesolv_mmff.pt"
-    split_dst = "processed/freesolv_split.pt"
+    sdf_folder = "sol_data/raw/lipop_sdfs"
+    target = pd.read_csv("sol_data/lipop.csv")
+    dst = "sol_data/processed/lipop_mmff.pt"
+    split_dst = "sol_data/processed/lipop_split.pt"
     data_list = []
     for i in tqdm(target.index):
         sdf_f = osp.join(sdf_folder, "{}.mmff.sdf".format(i))
