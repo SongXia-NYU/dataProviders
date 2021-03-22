@@ -39,7 +39,7 @@ def mmff_min_sdfs():
     # concatenate them in this order
     # concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True)
 
-    concat_csv = pd.read_csv("lipop.csv")
+    concat_csv = pd.read_csv("sol_data/lipop.csv")
     dst_folder = "/scratch/sx801/scripts/physnet-dimenet/dataProviders/sol_data/raw/lipop_sdfs/"
 
     def convert_conf_to_sdf_i(_i):
