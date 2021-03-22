@@ -267,6 +267,7 @@ def preprocess_frag20_sol():
     os.makedirs(save_root, exist_ok=True)
 
     data_list = []
+    success_map = []
     for i in tqdm(range(concat_csv.shape[0])):
         this_id = int(concat_csv["ID"].iloc[i])
         this_source = concat_csv["SourceFile"].iloc[i]
@@ -290,7 +291,10 @@ def preprocess_frag20_sol():
             raise ValueError("invalid geometry: " + geometry)
 
         if geometry == "mmff_gen":
-            sdf_file = osp.join("/ext3/mmff_generated/{}.mmff.sdf".format(i))
+            sdf_file = osp.join("/ext3/mmff_sdfs/{}.mmff.sdf".format(i))
+
+        if not osp.exists(sdf_file):
+            success_map.append(0)
 
         tmp = {}
         for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
@@ -305,9 +309,15 @@ def preprocess_frag20_sol():
                                      bond_atom_sep=False, record_long_range=True)
         data_list.append(data_edge)
 
+        success_map.append(1)
+
     print("collating and saving...")
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
                osp.join(save_root, "frag20_sol_{}_cutoff-10.pt".format(geometry)))
+
+    success_map = torch.as_tensor(success_map).long().view(-1)
+    print("Success: {}/{}".format(success_map.sum(), success_map.shape[0]))
+    torch.save(success_map, "success_map.pt")
 
     train_size = train_csv.shape[0]
     valid_size = valid_csv.shape[0]
@@ -315,7 +325,7 @@ def preprocess_frag20_sol():
     torch.save({"train_index": torch.arange(train_size),
                 "valid_index": torch.arange(train_size, train_size+valid_size),
                 "test_index": torch.arange(train_size+valid_size, train_size+valid_size+test_size)},
-               osp.join(save_root, "frag20_sol_split_03182021.pt"))
+               osp.join(save_root, "frag20_sol_split_{}_03222021.pt".format(geometry)))
 
 
 def sdf_to_pt(n_heavy, src_root, dst_root, geometry="qm"):
