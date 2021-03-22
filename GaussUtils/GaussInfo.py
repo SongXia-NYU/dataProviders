@@ -260,8 +260,8 @@ def preprocess_frag20_sol():
     cccd_ext = ".opt" if geometry == "qm" else "_min"
 
     ccdc_root = "/scratch/sx801/data/CSD20/CSD20/CSD20_data"
-    ccdc_extra_target = torch.load("/scratch/sx801/data/CSD20/CSD20/CSD20_extra_target.pt")
-    ccdc_target = pd.read_csv("/scratch/sx801/data/CSD20/CSD20/CSD20_target.csv")
+    ccdc_extra_target = torch.load("/ext3/CSD20_extra_target.pt")
+    ccdc_target = pd.read_csv("/ext3/CSD20_target.csv")
 
     save_root = "/scratch/sx801/data/Frag20-Sol"
     os.makedirs(save_root, exist_ok=True)
