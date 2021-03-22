@@ -295,6 +295,7 @@ def preprocess_frag20_sol():
 
         if not osp.exists(sdf_file):
             success_map.append(0)
+            continue
 
         tmp = {}
         for name in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "calcLogP"]:
