@@ -383,7 +383,7 @@ def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data"):
     :param use_jianing_ref:
     :return:
     """
-    if osp.exists(save_path):
+    if save_path is not None and osp.exists(save_path):
         raise ValueError("cannot overwrite existing file!!!")
     if use_jianing_ref:
         ref_data = np.load(osp.join(data_root, "raw/atomref.B3LYP_631Gd.10As.npz"))
