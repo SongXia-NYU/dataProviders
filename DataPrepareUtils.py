@@ -374,9 +374,10 @@ def remove_atom_from_dataset(atom_z, dataset, remove_split=('train', 'valid', 't
         return removed_index['train'], removed_index['valid'], removed_index['test']
 
 
-def subtract_ref(dataset, save_path, use_jianing_ref=True):
+def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data"):
     """
     Subtracting reference energy, the result is in eV unit
+    :param data_root:
     :param dataset:
     :param save_path:
     :param use_jianing_ref:
@@ -385,10 +386,10 @@ def subtract_ref(dataset, save_path, use_jianing_ref=True):
     if osp.exists(save_path):
         raise ValueError("cannot overwrite existing file!!!")
     if use_jianing_ref:
-        ref_data = np.load("data/raw/atomref.B3LYP_631Gd.10As.npz")
+        ref_data = np.load(osp.join(data_root, "raw/atomref.B3LYP_631Gd.10As.npz"))
         u0_ref = ref_data["atom_ref"][:, 1]
     else:
-        ref_data = pd.read_csv("data/raw/atom_ref_gas.csv")
+        ref_data = pd.read_csv(osp.join(data_root, "raw/atom_ref_gas.csv"))
         u0_ref = np.zeros(96, dtype=np.float)
         for i in range(ref_data.shape[0]):
             u0_ref[int(ref_data.iloc[i]["atom_num"])] = float(ref_data.iloc[i]["energy(eV)"])
@@ -399,8 +400,8 @@ def subtract_ref(dataset, save_path, use_jianing_ref=True):
             energy = getattr(data, prop)
             energy *= hartree2ev
             energy -= total_ref
-
-    torch.save((dataset.data, dataset.slices), save_path)
+    if save_path is not None:
+        torch.save((dataset.data, dataset.slices), save_path)
 
 
 def concat_im_datasets(root: str, datasets: List[str], out_name: str):
