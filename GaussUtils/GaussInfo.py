@@ -386,12 +386,16 @@ def sdf_to_pt(n_heavy, src_root, dst_root, geometry="qm"):
 
 
 def sdf_to_pt_eMol9(src_root, dst_root, geometry="qm"):
-    target_csv_f = osp.join(src_root, "eMol9_target.csv")
-    extra_target_f = osp.join(src_root, "eMol9_extra_target.pt")
+    sdf_to_pt_custom(src_root, dst_root, "eMol9", geometry=geometry)
+
+
+def sdf_to_pt_custom(src_root, dst_root, dataset_name, geometry="qm"):
+    target_csv_f = osp.join(src_root, "{}_target.csv".format(dataset_name))
+    extra_target_f = osp.join(src_root, "{}_extra_target.pt".format(dataset_name))
     extra_target = torch.load(extra_target_f)
     target_csv = pd.read_csv(target_csv_f)
     indexes = target_csv["f_name"].values.reshape(-1).tolist()
-    sdf = [osp.join(src_root, "eMol9_data", "{}.{}.sdf".format(i, geometry)) for i in indexes]
+    sdf = [osp.join(src_root, "{}_data".format(dataset_name), "{}.{}.sdf".format(i, geometry)) for i in indexes]
 
     data_list = []
     for i in tqdm(range(target_csv.shape[0])):
@@ -403,7 +407,7 @@ def sdf_to_pt_eMol9(src_root, dst_root, geometry="qm"):
                                      bond_atom_sep=False, record_long_range=True)
         data_list.append(data_edge)
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
-               osp.join(dst_root, "eMol9_raw_{}.pt".format(geometry)))
+               osp.join(dst_root, "{}_raw_{}.pt".format(dataset_name, geometry)))
 
 
 if __name__ == '__main__':
