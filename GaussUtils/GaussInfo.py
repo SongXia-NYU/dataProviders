@@ -127,16 +127,20 @@ class Gauss16Info:
 
     def _get_elements(self):
         """ Get elements infor for both atomic number, and periodic based """
-        atoms = []
-        QMnatoms = 0
-        for line in self.qm_lines[4:]:
-            if len(line.strip().split()) == 4:
-                break
-            else:
-                atoms.append(line)
-                QMnatoms += 1
+        def _get_atoms(lines):
+            _atoms = []
+            natoms = 0
+            for line in lines[4:]:
+                if len(line.strip().split()) == 4:
+                    break
+                else:
+                    _atoms.append(line)
+                    natoms += 1
+            return natoms, _atoms
+
+        QMnatoms, atoms = _get_atoms(self.qm_lines)
         if self.mmff_lines is not None:
-            MMFFnatoms = int(self.mmff_lines[3].split()[0])
+            MMFFnatoms, _ = _get_atoms(self.mmff_lines)
             assert QMnatoms == MMFFnatoms, "Error: different number of atoms in mmff and qm optimized files"
         self.n_atoms = QMnatoms
         elements = []
@@ -292,7 +296,8 @@ def preprocess_frag20_sol():
                 mask = (tgt_info_heavy[n_heavy]["index"] == this_id).values.reshape(-1)
                 tgt_dict = tgt_info_heavy[n_heavy].loc[mask].iloc[0].to_dict()
                 if n_heavy > 9:
-                    sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(this_id, frag20_ext))
+                    sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy),
+                                        "{}{}.sdf".format(this_id, frag20_ext))
                 else:
                     sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy), "pubchem",
                                         "{}{}.sdf".format(this_id, frag20_ext))
@@ -334,8 +339,8 @@ def preprocess_frag20_sol():
     valid_size = valid_csv.shape[0]
     test_size = test_csv.shape[0]
     torch.save({"train_index": torch.arange(train_size),
-                "valid_index": torch.arange(train_size, train_size+valid_size),
-                "test_index": torch.arange(train_size+valid_size, train_size+valid_size+test_size)},
+                "valid_index": torch.arange(train_size, train_size + valid_size),
+                "test_index": torch.arange(train_size + valid_size, train_size + valid_size + test_size)},
                osp.join(save_root, "frag20_sol_split_{}_03222021.pt".format(geometry)))
 
 
