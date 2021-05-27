@@ -35,7 +35,7 @@ if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    qm9_data = np.load('qm9_qm_removeproblem.npz')
+    qm9_data = np.load('qm9_removeproblem.npz')
     qm9_data_shape = qm9_data['R'].shape
     num_mols = qm9_data_shape[0]
     max_atoms = qm9_data_shape[1]

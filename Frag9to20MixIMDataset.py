@@ -42,7 +42,7 @@ class Frag9to20MixIMDataset(InMemoryDataset):
                  pre_transform=None, boundary_factor=100., type_3_body='B', extended_bond=False,
                  edge_version='cutoff', cutoff=10., cal_3body_term=True, sort_edge=True, use_center=True,
                  bond_atom_sep=True, cal_efg=False, record_long_range=False, frag20n9=False,
-                 geometry='QM', add_sol=False, use_ref=True):
+                 geometry='QM', add_sol=False, use_ref=True, **kwargs):
         """
         This in-memory dataset contains a mixture of Frag9 and Frag20
         :param root:

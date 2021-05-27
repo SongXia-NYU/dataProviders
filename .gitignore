@@ -1,3 +1,10 @@
 /data
 /sol_data/raw
 /sol_data/processed
+/prepare_data.bash
+/conf_error_list.pt
+/*.pbs
+slurm*.out
+/lipop.csv
+/*.pt
+__pycache__
