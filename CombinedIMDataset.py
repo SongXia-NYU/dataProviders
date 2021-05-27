@@ -23,7 +23,7 @@ class CombinedIMDataset(InMemoryDataset):
         torch.save((data, slices), self.processed_paths[0])
 
     def __init__(self, root, dataset_name, dataset_list=None, transform=None, pre_transform=None, train_index=None,
-                 val_index=None, test_index=None):
+                 val_index=None, test_index=None, **kwargs):
         self.dataset_list = dataset_list
         self.dataset_name = dataset_name
         super().__init__(root, transform, pre_transform)
