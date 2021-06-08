@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import List
 
@@ -9,7 +10,6 @@ import os.path as osp
 import torch_geometric
 from scipy.spatial import Voronoi
 from torch_geometric.data import Data
-from rdkit.Chem.inchi import MolToInchi
 from ase.units import Hartree, eV
 
 from DummyIMDataset import DummyIMDataset
@@ -274,6 +274,8 @@ def physnet_to_datalist(self, N, R, E, D, Q, Z, num_mol, mols, efgs_batch, EFG_R
     load data from PhysNet structure to InMemoryDataset structure (more compact)
     :return:
     """
+    from rdkit.Chem.inchi import MolToInchi
+
     data_array = np.empty(num_mol, dtype=Data)
     t0 = time.time()
     Z_0 = Z[0, :]
@@ -383,6 +385,9 @@ def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data"):
     :param use_jianing_ref:
     :return:
     """
+    if save_path:
+        logging.info("We prefer to subtract reference on the fly rather than save the file!")
+        print("We prefer to subtract reference on the fly rather than save the file!")
     if save_path is not None and osp.exists(save_path):
         raise ValueError("cannot overwrite existing file!!!")
     if use_jianing_ref:
