@@ -9,7 +9,6 @@ import os.path as osp
 import torch_geometric
 from scipy.spatial import Voronoi
 from torch_geometric.data import Data
-from rdkit.Chem.inchi import MolToInchi
 from ase.units import Hartree, eV
 
 from DummyIMDataset import DummyIMDataset
@@ -274,6 +273,8 @@ def physnet_to_datalist(self, N, R, E, D, Q, Z, num_mol, mols, efgs_batch, EFG_R
     load data from PhysNet structure to InMemoryDataset structure (more compact)
     :return:
     """
+    from rdkit.Chem.inchi import MolToInchi
+
     data_array = np.empty(num_mol, dtype=Data)
     t0 = time.time()
     Z_0 = Z[0, :]
