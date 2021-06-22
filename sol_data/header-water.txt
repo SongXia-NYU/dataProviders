@@ -1,3 +1,0 @@
-#  B3LYP/6-31G* scrf=(smd, solvent=water)
-
-test
