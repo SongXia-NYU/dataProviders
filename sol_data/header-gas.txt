@@ -1,0 +1,3 @@
+# opt freq B3LYP/6-31G*
+
+test
