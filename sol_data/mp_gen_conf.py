@@ -1,6 +1,9 @@
 from DataGen.genconfs import runGenerator
-from multiprocess.pool import Pool
+from multiprocessing import Pool
 import pandas as pd
+
+
+concat_csv = pd.read_csv("lipop.csv")
 
 
 def _run_generator(i):
@@ -8,6 +11,5 @@ def _run_generator(i):
 
 
 if __name__ == '__main__':
-    concat_csv = pd.read_csv("lipop.csv")
-    with Pool(20) as p:
+    with Pool(16) as p:
         p.map(_run_generator, range(concat_csv.shape[0]))

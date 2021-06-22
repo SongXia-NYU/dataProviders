@@ -32,12 +32,4 @@ if __name__ == '__main__':
     # parser.add_argument("--header", type=str, default="header.txt")
     # args = parser.parse_args()
     # main(args.input_dir, args.output_dir, args.header)
-    for i in range(9, 21):
-        for phase in ["water", "oct"]:
-            if i > 9:
-                main("calc/sdf/{}".format(i), "calc/com_{}/{}".format(phase, i), header="header-{}.txt".format(phase))
-            else:
-                main("calc/sdf/{}/zinc".format(i), "calc/com_{}/9/zinc".format(phase, i),
-                     header="header-{}.txt".format(phase))
-                main("calc/sdf/{}/pubchem".format(i), "calc/com_{}/9/pubchem".format(phase, i),
-                     header="header-{}.txt".format(phase))
+    main("raw/lipop_mmff_sdfs", "raw/lipop_coms", header="header.txt")
