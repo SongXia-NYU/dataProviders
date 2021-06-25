@@ -16,4 +16,4 @@ if __name__ == '__main__':
                 files = glob(osp.join(f_dir, "*.opt.log"))
                 print(f"N_logs heavy: {src}_{n_heavy}, num: {len(files)}")
                 total_count += len(files)
-    print(f"{total_count = }")
+    print(f"total : {total_count}")

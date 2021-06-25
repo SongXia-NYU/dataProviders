@@ -13,12 +13,13 @@ def main(input_dir, output_dir, header="header.txt"):
     input_files = glob(osp.join(input_dir, "*.sdf"))
 
     for input_file in input_files:
+        print(input_file)
         basename = osp.basename(input_file)
         output_file = osp.join(output_dir, basename.split(".")[0]+".com")
         tmp_file = osp.join(output_dir, basename.split(".")[0]+".tmp")
         os.system("obabel -isdf {} -ocom -O {}".format(input_file, output_file))
 
-        cmd1 = "tail -n+4 {} > {}".format(output_file, tmp_file)
+        cmd1 = "tail -n+5 {} > {}".format(output_file, tmp_file)
         cmd2 = "cat {} {} > {}".format(header, tmp_file, output_file)
         os.system(cmd1)
         os.system(cmd2)
