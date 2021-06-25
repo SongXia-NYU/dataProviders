@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import List
 
@@ -275,7 +276,6 @@ def physnet_to_datalist(self, N, R, E, D, Q, Z, num_mol, mols, efgs_batch, EFG_R
     """
     from rdkit.Chem.inchi import MolToInchi
 
-
     data_array = np.empty(num_mol, dtype=Data)
     t0 = time.time()
     Z_0 = Z[0, :]
@@ -385,6 +385,9 @@ def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data"):
     :param use_jianing_ref:
     :return:
     """
+    if save_path:
+        logging.info("We prefer to subtract reference on the fly rather than save the file!")
+        print("We prefer to subtract reference on the fly rather than save the file!")
     if save_path is not None and osp.exists(save_path):
         raise ValueError("cannot overwrite existing file!!!")
     if use_jianing_ref:
