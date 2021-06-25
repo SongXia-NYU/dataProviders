@@ -236,7 +236,7 @@ class Gauss16Info:
         return Data(**_tmp_data)
 
 
-def read_gauss_log(input_file, output_path, indexes, gauss_version):
+def read_gauss_log(input_file, output_path, indexes, gauss_version=16):
     if indexes is not None:
         log_files = [input_file.format(i) for i in indexes]
     else:
