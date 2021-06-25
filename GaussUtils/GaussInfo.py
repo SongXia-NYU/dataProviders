@@ -224,19 +224,21 @@ class Gauss16Info:
     def get_torch_data(self) -> torch_geometric.data.Data:
         _tmp_data = {"R": torch.as_tensor(self.qm_coords).view(-1, 3),
                      "Z": torch.as_tensor(self.elements).view(-1),
+                     "Z_atom": torch.as_tensor(self.charges_mulliken).double().view(-1),
                      "Q": torch.as_tensor([0.]).view(-1),
                      "F": torch.as_tensor([[0., 0., 0.]]).view(-1, 3),
                      "N": torch.as_tensor(self.n_atoms).view(-1)}
         if self.dipole is not None:
             _tmp_data["D"] = torch.as_tensor(self.dipole).view(-1, 3)
-        if "U0_atom" in self.prop_dict_raw:
-            _tmp_data["E"] = torch.as_tensor(self.prop_dict_raw["U0_atom"]).view(-1)
-        if "dd_target" in self.prop_dict_raw.keys():
-            _tmp_data.update(self.prop_dict_raw["dd_target"])
+        for key in self.prop_dict_raw:
+            if key == "U0_atom":
+                _tmp_data["E"] = torch.as_tensor(self.prop_dict_raw["U0_atom"]).view(-1)
+            elif key == "dd_target":
+                _tmp_data.update(self.prop_dict_raw["dd_target"])
         return Data(**_tmp_data)
 
 
-def read_gauss_log(input_file, output_path, indexes, gauss_version=16):
+def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16):
     if indexes is not None:
         log_files = [input_file.format(i) for i in indexes]
     else:
