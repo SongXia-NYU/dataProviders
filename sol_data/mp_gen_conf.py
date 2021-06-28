@@ -13,4 +13,4 @@ def _run_generator(i):
 
 if __name__ == '__main__':
     with Pool(16) as p:
-        p.map(_run_generator, range(concat_csv.shape[0]))
+        p.map(_run_generator, range(12878, concat_csv.shape[0]))

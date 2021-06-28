@@ -62,7 +62,7 @@ class Gauss16Info:
 
         self.prop_dict_raw = prop_dict_raw
         if self.prop_dict_raw is None:
-            self._reference = np.load("atomref.B3LYP_631Gd.10As.npz")["atom_ref"]
+            self._reference = np.load("/scratch/sx801/scripts/physnet-dimenet/dataProviders/GaussUtils/atomref.B3LYP_631Gd.10As.npz")["atom_ref"]
             self.prop_dict_raw = {}
             # read properties from log file
             self._read_prop()
@@ -132,7 +132,7 @@ class Gauss16Info:
             _atoms = []
             natoms = 0
             for line in lines[4:]:
-                if len(line.strip().split()) == 4:
+                if len(line.strip().split()) != 16:
                     break
                 else:
                     _atoms.append(line)
