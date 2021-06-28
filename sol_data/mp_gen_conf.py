@@ -3,11 +3,12 @@ from multiprocessing import Pool
 import pandas as pd
 
 
-concat_csv = pd.read_csv("lipop.csv")
+concat_csv = pd.read_csv("openchem_logP.csv")
 
 
 def _run_generator(i):
-    runGenerator([concat_csv.index.tolist()[i]], [concat_csv["cano_smiles"].tolist()[i]], "lipop", "raw/lipop_confs")
+    runGenerator([concat_csv.index.tolist()[i]], [concat_csv["SMILES"].tolist()[i]], "openchem_logP",
+                 "raw/openchem_logP_confs")
 
 
 if __name__ == '__main__':
