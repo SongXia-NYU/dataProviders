@@ -43,6 +43,7 @@ class Gauss16Info:
         self.normal_termination = self._normal_finishes() if qm_sdf is None else True
         if not self.normal_termination:
             print("{} did not terminate normally!!".format(log_path))
+            return
 
         self.base_name = osp.basename(log_path).split(".")[0] \
             if log_path is not None else osp.basename(qm_sdf).split(".")[0]
@@ -247,8 +248,9 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16):
     data_list = []
     for log_file in tqdm(log_files):
         info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
-        result_csv = result_csv.append(info.get_data_frame())
-        data_list.append(info.get_torch_data())
+        if info.normal_termination:
+            result_csv = result_csv.append(info.get_data_frame())
+            data_list.append(info.get_torch_data())
 
     if osp.isdir(output_path):
         result_csv.to_csv(osp.join(output_path, "out.csv"), index=False)
