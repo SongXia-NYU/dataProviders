@@ -7,5 +7,4 @@
 slurm*.out
 /lipop.csv
 /*.pt
-__pycache__
 /lipop_process/processed
