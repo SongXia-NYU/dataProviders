@@ -9,3 +9,4 @@ slurm*.out
 /*.pt
 /lipop_process/processed
 /crossdock2020_process
+/dd_sol_exp
