@@ -10,3 +10,4 @@ slurm*.out
 /lipop_process/processed
 /crossdock2020_process
 /dd_sol_exp
+/__pycache__
