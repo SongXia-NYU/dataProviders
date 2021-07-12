@@ -12,7 +12,7 @@ def min_sdf():
     files = glob("raw/openchem_logP_confs/*.sdf")
     for f in tqdm(files):
         try:
-            suppl = SDMolSupplier(f)
+            suppl = SDMolSupplier(f, removeHs=False)
             lowest_e = np.inf
             selected_mol = None
             for mol in suppl:
@@ -23,9 +23,7 @@ def min_sdf():
             if selected_mol is not None:
                 writer = SDWriter(f"raw/openchem_logP_mmff_sdfs/{osp.basename(f).split('.')[0].split('_')[0]}.mmff.sdf")
                 writer.write(selected_mol)
-        except OSError as e:
-            print(e)
-        except KeyError as e:
+        except Exception as e:
             print(e)
 
 

@@ -62,7 +62,7 @@ class Gauss16Info:
 
         self.prop_dict_raw = prop_dict_raw
         if self.prop_dict_raw is None:
-            self._reference = np.load("/scratch/sx801/scripts/physnet-dimenet/dataProviders/GaussUtils/atomref.B3LYP_631Gd.10As.npz")["atom_ref"]
+            self._reference = np.load(osp.join(osp.dirname(__file__), "atomref.B3LYP_631Gd.10As.npz"))["atom_ref"]
             self.prop_dict_raw = {}
             # read properties from log file
             self._read_prop()
