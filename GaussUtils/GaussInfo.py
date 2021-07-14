@@ -1,3 +1,5 @@
+from typing import Union
+
 import pandas as pd
 from ase.units import Hartree, eV, Bohr, Ang
 import os
@@ -27,7 +29,7 @@ class Gauss16Info:
         """
         # for conversion of element, which is the atomic number of element
         self.gauss_version = gauss_version
-        self.dipole = dipole
+        self._dipole = dipole
         from mendeleev import get_all_elements
         self._element_dict = {e.symbol: e.atomic_number for e in get_all_elements()}
         # self._element_dict = {'H': 1, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'P': 15, 'S': 16, 'Cl': 17, 'Se': 34,
@@ -62,7 +64,9 @@ class Gauss16Info:
 
         self.prop_dict_raw = prop_dict_raw
         if self.prop_dict_raw is None:
-            self._reference = np.load("/scratch/sx801/scripts/physnet-dimenet/dataProviders/GaussUtils/atomref.B3LYP_631Gd.10As.npz")["atom_ref"]
+            ref_folder = "/scratch/sx801/scripts/physnet-dimenet/dataProviders/GaussUtils/atomref.B3LYP_631Gd.10As.npz"
+            ref_folder = "/Users/songxia/Documents/PycharmProjects/dataProviders/GaussUtils/atomref.B3LYP_631Gd.10As.npz"
+            self._reference = np.load(ref_folder)["atom_ref"]
             self.prop_dict_raw = {}
             # read properties from log file
             self._read_prop()
@@ -70,11 +74,7 @@ class Gauss16Info:
         self._get_elements()
         # get coordinates of the elements from .sdf file
         self._get_coordinates()
-        if (self.dipole is None) and (log_path is not None):
-            # get mulliken charge from log file
-            self._get_mulliken_charges()
-            # calculate dipole
-            self._get_dipole()
+        self._charges_mulliken = None
         if log_path is not None:
             # subtract reference energy
             self._prop_ref()
@@ -173,35 +173,45 @@ class Gauss16Info:
         self.mmff_coords = positions_MMFF
         self.qm_coords = positions_QM
 
-    def _get_mulliken_charges(self):
+    @property
+    def charges_mulliken(self):
         """ Get Mulliken charges """
-        index = [idx for idx, line in enumerate(self.log_lines) if line.startswith(" Mulliken charges:")][0] + 2
-        natoms_old = self.n_atoms
-        natoms = self.n_atoms
-        try:
-            charges = [float(line.split()[-1]) for line in self.log_lines[index: index + natoms]]
-        except:
-            charges = []
-            for idx, line in enumerate(self.log_lines[index:]):
-                if idx < natoms:
-                    # remove calculation comments in Mulliken charges part ###
-                    try:
-                        charge = float(line.split()[-1])
-                        charges.append(charge)
-                    except:
-                        print(line)
-                        natoms += 1
-                        continue
-        assert len(charges) == natoms_old, "Error: charges are wrong"
-        self.charges_mulliken = charges
+        if self._charges_mulliken is None:
+            if self.log_lines is None:
+                return None
+            index = [idx for idx, line in enumerate(self.log_lines) if line.startswith(" Mulliken charges:")][0] + 2
+            natoms_old = self.n_atoms
+            natoms = self.n_atoms
+            try:
+                charges = [float(line.split()[-1]) for line in self.log_lines[index: index + natoms]]
+            except:
+                charges = []
+                for idx, line in enumerate(self.log_lines[index:]):
+                    if idx < natoms:
+                        # remove calculation comments in Mulliken charges part ###
+                        try:
+                            charge = float(line.split()[-1])
+                            charges.append(charge)
+                        except:
+                            print(line)
+                            natoms += 1
+                            continue
+            assert len(charges) == natoms_old, "Error: charges are wrong"
+            self._charges_mulliken = charges
+        return self._charges_mulliken
 
-    def _get_dipole(self):
+    @property
+    def dipole(self):
         """ Calculate dipole using coordinates and charge for each atom """
-        coords = self.qm_coords
-        dipole = [[coords[i][0] * self.charges_mulliken[i], coords[i][1] * self.charges_mulliken[i],
-                   coords[i][2] * self.charges_mulliken[i]] for i in range(self.n_atoms)]
-        dipole = np.sum(dipole, axis=0)
-        self.dipole = dipole
+        if self._dipole is None:
+            if self.charges_mulliken is None:
+                return None
+            coords = self.qm_coords
+            dipole = [[coords[i][0] * self.charges_mulliken[i], coords[i][1] * self.charges_mulliken[i],
+                       coords[i][2] * self.charges_mulliken[i]] for i in range(self.n_atoms)]
+            dipole = np.sum(dipole, axis=0)
+            self._dipole = dipole
+        return self._dipole
 
     def _prop_ref(self):
         """ Get properties for each molecule, and convert properties in Hartree unit into eV unit """
@@ -225,17 +235,30 @@ class Gauss16Info:
     def get_torch_data(self) -> torch_geometric.data.Data:
         _tmp_data = {"R": torch.as_tensor(self.qm_coords).view(-1, 3),
                      "Z": torch.as_tensor(self.elements).view(-1),
-                     "Z_atom": torch.as_tensor(self.charges_mulliken).double().view(-1),
                      "Q": torch.as_tensor([0.]).view(-1),
                      "F": torch.as_tensor([[0., 0., 0.]]).view(-1, 3),
                      "N": torch.as_tensor(self.n_atoms).view(-1)}
         if self.dipole is not None:
             _tmp_data["D"] = torch.as_tensor(self.dipole).view(-1, 3)
+        if self.charges_mulliken is not None:
+            _tmp_data["Z_atom"] = torch.as_tensor(self.charges_mulliken).double().view(-1)
         for key in self.prop_dict_raw:
             if key == "U0_atom":
                 _tmp_data["E"] = torch.as_tensor(self.prop_dict_raw["U0_atom"]).view(-1)
             elif key == "dd_target":
                 _tmp_data.update(self.prop_dict_raw["dd_target"])
+            else:
+                data = self.prop_dict_raw[key]
+                if isinstance(data, str):
+                    _tmp_data[key] = data
+                elif isinstance(data, int):
+                    _tmp_data[key] = torch.as_tensor(data).long()
+                elif isinstance(data, float):
+                    _tmp_data[key] = torch.as_tensor(data).double()
+                elif isinstance(data, torch.Tensor):
+                    _tmp_data[key] = data
+                else:
+                    pass
         return Data(**_tmp_data)
 
 
