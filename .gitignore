@@ -11,3 +11,4 @@ slurm*.out
 /crossdock2020_process
 /dd_sol_exp
 /__pycache__
+/cy_PL_dataset
