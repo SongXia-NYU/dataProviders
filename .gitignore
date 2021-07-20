@@ -6,9 +6,10 @@
 /*.pbs
 slurm*.out
 /lipop.csv
-/*.pt
+*.pt
 /lipop_process/processed
 /crossdock2020_process
+/dd_sol_exp
 /dd_sol_exp
 /__pycache__
 /cy_PL_dataset
