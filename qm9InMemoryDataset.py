@@ -1,10 +1,8 @@
-import time
-from datetime import datetime
+import os
 
 import numpy as np
-import os
 import torch
-from torch_geometric.data import InMemoryDataset, Data
+from torch_geometric.data import InMemoryDataset
 
 from DataPrepareUtils import my_pre_transform, name_extender, physnet_to_datalist
 
