@@ -108,7 +108,7 @@ def remove_bonding_edge(all_edge_index, bond_edge_index):
     :param bond_edge_index:
     :return:
     """
-    mask = torch.zeros(all_edge_index.shape[-1]).bool().fill_(False)
+    mask = torch.zeros(all_edge_index.shape[-1]).bool().fill_(False).type(all_edge_index.type())
     len_bonding = bond_edge_index.shape[-1]
     for i in range(len_bonding):
         same_atom = (all_edge_index == bond_edge_index[:, i].view(-1, 1))
