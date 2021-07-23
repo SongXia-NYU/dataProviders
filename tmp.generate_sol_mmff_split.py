@@ -5,7 +5,7 @@ import torch
 if __name__ == '__main__':
     is_generated_mmff = False
     dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
-    train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
+    train_csv = pd.read_csv(osp.join(dd_csv_folder, "all.csv"))
     valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
     test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
 

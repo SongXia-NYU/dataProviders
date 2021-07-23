@@ -284,7 +284,7 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16):
 def preprocess_frag20_sol():
     geometry = "mmff_gen"
     dd_csv_folder = "/scratch/projects/yzlab/group/temp_dd/solvation/calculated/"
-    train_csv = pd.read_csv(osp.join(dd_csv_folder, "train.csv"))
+    train_csv = pd.read_csv(osp.join(dd_csv_folder, "all.csv"))
     valid_csv = pd.read_csv(osp.join(dd_csv_folder, "valid.csv"))
     test_csv = pd.read_csv(osp.join(dd_csv_folder, "test.csv"))
     # concatenate them in this order

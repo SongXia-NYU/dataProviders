@@ -1,20 +1,13 @@
-import logging
 import time
-from typing import List
 
 import numpy as np
-import pandas as pd
 import torch
-import os.path as osp
-
-import torch_geometric
+from ase.units import Hartree, eV
 from scipy.spatial import Voronoi
 from torch_geometric.data import Data
-from ase.units import Hartree, eV
-
-from DummyIMDataset import DummyIMDataset
-from utils.utils_functions import cal_edge
 from tqdm import tqdm
+
+from utils.utils_functions import cal_edge
 
 hartree2ev = Hartree / eV
 
@@ -375,46 +368,3 @@ def remove_atom_from_dataset(atom_z, dataset, remove_split=('train', 'valid', 't
     else:
         return removed_index['train'], removed_index['valid'], removed_index['test']
 
-
-def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data"):
-    """
-    Subtracting reference energy, the result is in eV unit
-    :param data_root:
-    :param dataset:
-    :param save_path:
-    :param use_jianing_ref:
-    :return:
-    """
-    if save_path:
-        logging.info("We prefer to subtract reference on the fly rather than save the file!")
-        print("We prefer to subtract reference on the fly rather than save the file!")
-    if save_path is not None and osp.exists(save_path):
-        raise ValueError("cannot overwrite existing file!!!")
-    if use_jianing_ref:
-        ref_data = np.load(osp.join(data_root, "raw/atomref.B3LYP_631Gd.10As.npz"))
-        u0_ref = ref_data["atom_ref"][:, 1]
-    else:
-        ref_data = pd.read_csv(osp.join(data_root, "raw/atom_ref_gas.csv"))
-        u0_ref = np.zeros(96, dtype=np.float)
-        for i in range(ref_data.shape[0]):
-            u0_ref[int(ref_data.iloc[i]["atom_num"])] = float(ref_data.iloc[i]["energy(eV)"])
-    for i in tqdm(range(len(dataset))):
-        data = dataset[i]
-        total_ref = u0_ref[data.Z].sum()
-        for prop in ["watEnergy", "octEnergy", "gasEnergy"]:
-            energy = getattr(data, prop)
-            energy *= hartree2ev
-            energy -= total_ref
-    if save_path is not None:
-        torch.save((dataset.data, dataset.slices), save_path)
-
-
-def concat_im_datasets(root: str, datasets: List[str], out_name: str):
-    data_list = []
-    for dataset in datasets:
-        dummy_dataset = DummyIMDataset(root, dataset)
-        for i in tqdm(range(len(dummy_dataset)), dataset):
-            data_list.append(dummy_dataset[i])
-    print("saving... it is recommended to have 32GB memory")
-    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
-               osp.join(root, "data/processed", out_name))
