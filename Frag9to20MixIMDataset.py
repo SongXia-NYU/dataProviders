@@ -8,7 +8,7 @@ import numpy as np
 from torch_geometric.data import InMemoryDataset, Data
 from tqdm import tqdm
 
-from DataPrepareUtils import name_extender, my_pre_transform, subtract_ref, sol_keys
+from DataPrepareUtils import name_extender, my_pre_transform, sol_keys
 from Frag20IMDataset import Frag20IMDataset
 
 '''

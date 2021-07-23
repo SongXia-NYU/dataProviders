@@ -14,7 +14,7 @@ hartree2ev = Hartree / eV
 
 
 class DummyIMDataset(InMemoryDataset):
-    def __init__(self, root, dataset_name, split=None, sub_ref=True, **kwargs):
+    def __init__(self, root, dataset_name, split=None, sub_ref=False, **kwargs):
         self.sub_ref = sub_ref
         self.dataset_name = dataset_name
         self.split = split
@@ -67,7 +67,7 @@ def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data"):
     if save_path is not None and osp.exists(save_path):
         raise ValueError("cannot overwrite existing file!!!")
     if use_jianing_ref:
-        ref_data = np.load(osp.join(data_root, "raw/atomref.B3LYP_631Gd.10As.npz"))
+        ref_data = np.load(osp.join(data_root, "atomref.B3LYP_631Gd.10As.npz"))
         u0_ref = ref_data["atom_ref"][:, 1]
     else:
         ref_data = pd.read_csv(osp.join(data_root, "raw/atom_ref_gas.csv"))
