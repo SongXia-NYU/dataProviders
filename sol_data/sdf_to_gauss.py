@@ -33,4 +33,4 @@ if __name__ == '__main__':
     # parser.add_argument("--header", type=str, default="header.txt")
     # args = parser.parse_args()
     # main(args.input_dir, args.output_dir, args.header)
-    main("raw/openchem_logP_mmff_sdfs", "raw/openchem_logP_mmff_coms", header="header.txt")
+    main("raw/freesolv_sdfs", "raw/freesolv_coms", header="header.txt")
