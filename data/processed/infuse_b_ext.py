@@ -7,9 +7,9 @@ import os.path as osp
 
 
 if __name__ == '__main__':
-    dataset_name = "frag20reducedAllSolRef-Bmsg-cutoff-10.00-sorted-defined_edge-lr-QM.pt"
+    dataset_name = "frag20reducedAllSolRef-Bmsg-cutoff-10.00-sorted-defined_edge-lr-MMFF.pt"
     split = "frag20_sol_split.pt"
-    save_name = "frag20reducedAllSolRef-B-ext-cutoff-10.00-sorted-defined_edge-lr-QM.pt"
+    save_name = "frag20reducedAllSolRef-B-ext-cutoff-10.00-sorted-defined_edge-lr-MMFF.pt"
     root = "/scratch/sx801/scripts/physnet-dimenet/dataProviders/data"
 
     dataset = DummyIMDataset(root=root, dataset_name=dataset_name, split=split)
