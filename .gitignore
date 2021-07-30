@@ -1,4 +1,5 @@
-/data
+/data/raw/*.pt
+/data/processed/*.pt
 /sol_data/raw/*.pt
 /sol_data/processed/*.pt
 /prepare_data.bash
