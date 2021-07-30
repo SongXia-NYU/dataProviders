@@ -1,6 +1,6 @@
 /data
-/sol_data/raw
-/sol_data/processed
+/sol_data/raw/*.pt
+/sol_data/processed/*.pt
 /prepare_data.bash
 /conf_error_list.pt
 /*.pbs
