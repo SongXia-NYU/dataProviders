@@ -16,7 +16,9 @@ if __name__ == '__main__':
     data_list = []
     for i in range(len(dataset)):
         data = dataset[i]
-        setattr(data, "B-ext_edge_index", extend_bond(data.B_edge_index))
+        edge = extend_bond(data.B_edge_index)
+        setattr(data, "B-ext_edge_index", edge)
+        setattr(data, "num_B-ext_edge", edge.shape[-1])
         data_list.append(data)
         if i % 1000 == 0:
             print(f"---------{i} / {len(dataset)}---------")
