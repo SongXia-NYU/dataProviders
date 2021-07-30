@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+#SBATCH --job-name=infuse-ext
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=16:00:00
+#SBATCH --mem=40GB
+
+module purge
+
+singularity exec --nv \
+            --overlay ~/conda_envs/pytorch1.9-cuda102-15GB-500K.ext3:ro \
+            /scratch/work/public/singularity/cuda10.2-cudnn8-devel-ubuntu18.04.sif \
+            bash -c "source /ext3/env.sh; export PYTHONPATH=../../:../../Design-14-mem_pooling:$PYTHONPATH; python infuse_b_ext.py"
