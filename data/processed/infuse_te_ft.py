@@ -3,7 +3,7 @@ from copy import copy
 
 
 def infuse_te_ft():
-    calc_mol_prop = torch.load("free_solv_embed160_switch_dataset.pt")
+    calc_mol_prop = torch.load("free_solv_embed160_exp331_dataset.pt")
     data = torch.load("freesolv_mmff.pt")
     for i, key in enumerate(["gasEnergy", "watEnergy", "octEnergy"]):
         setattr(data[0], key, calc_mol_prop["mol_prop"][:, i])
@@ -16,7 +16,7 @@ def infuse_te_ft():
     for key in ["CalcOct", "CalcSol", "watOct"]:
         data[1][key] = copy(data[1]["N"])
 
-    torch.save(data, "freesolv_te_mam_ft_mmff_exp327.pt")
+    torch.save(data, "freesolv_te_mam_ft_mmff_exp331.pt")
 
     print("finished")
 
