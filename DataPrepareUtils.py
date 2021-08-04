@@ -338,6 +338,8 @@ def remove_atom_from_dataset(atom_z, dataset, remove_split=('train', 'valid', 't
     :return:
     new train, valid, test split
     """
+    # list to set for faster speed
+    atom_z = set(atom_z)
     if explicit_split is not None:
         index_getter = {
             'train': explicit_split[0],
@@ -353,13 +355,14 @@ def remove_atom_from_dataset(atom_z, dataset, remove_split=('train', 'valid', 't
     removed_index = {'train': None, 'valid': None, 'test': None}
     mask_dict = {'train': None, 'valid': None, 'test': None}
     for key in remove_split:
-        if index_getter[key] == 'none':
+        if isinstance(index_getter[key], str) and index_getter[key] == 'none':
             removed_index[key] = None
         else:
             index = torch.as_tensor(index_getter[key])
             mask = torch.zeros_like(index).bool().fill_(True)
             for num, i in enumerate(index):
-                if torch.sum(dataset[i.item()].Z == atom_z) > 0:
+                this_atom_z = set(dataset[i.item()].Z.tolist())
+                if len(this_atom_z.intersection(atom_z)) > 0:
                     mask[num] = False
             removed_index[key] = index[mask]
             mask_dict[key] = mask

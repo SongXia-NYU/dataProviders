@@ -1,7 +1,7 @@
 from mendeleev import get_all_elements
 import torch
 
-dataset_name = "freesolv_mmff.pt"
+dataset_name = "lipop_logP_mmff.pt"
 
 if __name__ == '__main__':
     atm_num_to_name = {e.atomic_number: e.symbol for e in get_all_elements()}

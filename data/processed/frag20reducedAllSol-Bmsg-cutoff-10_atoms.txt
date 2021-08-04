@@ -1,4 +1,4 @@
-atomic_number symbol
+atomic_number,symbol
 1,H
 35,Br
 5,B
