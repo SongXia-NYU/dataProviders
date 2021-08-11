@@ -44,6 +44,9 @@ if __name__ == '__main__':
     parser.add_argument("--job_pattern", type=str, default="job_{}.sbatch")
     parser.add_argument("--tasks_per_job", type=int, default=1)
     parser.add_argument("--second_round", action="store_true")
+    parser.add_argument("--time", default=10)
+    parser.add_argument("--mem", default=3)
+    parser.add_argument("--cpus", default=2)
     args = parser.parse_args()
-    main(args.input_dir, args.output_dir, time=10, mem=3, cpus=2, tasks_per_job=args.tasks_per_job,
-         job_pattern=args.job_pattern, second_round=args.second_round)
+    args_dict = vars(args)
+    main(**args_dict)
