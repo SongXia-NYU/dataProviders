@@ -230,6 +230,13 @@ class Gauss16Info:
         pd_dict["f_name"] = [self.base_name]
         return pd.DataFrame(pd_dict)
 
+    def get_error_lines(self) -> pd.DataFrame:
+        lines_track = 10
+        error_lines = {"f_name": osp.basename(self.log_path)}
+        for i in range(1, lines_track+1):
+            error_lines[f"error_line_-{i}"] = [self.log_lines[-i]]
+        return pd.DataFrame(error_lines)
+
     def get_torch_data(self) -> torch_geometric.data.Data:
         _tmp_data = {"R": torch.as_tensor(self.qm_coords).view(-1, 3),
                      "Z": torch.as_tensor(self.elements).view(-1),
@@ -265,19 +272,24 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16):
         log_files = [input_file.format(i) for i in indexes]
     else:
         log_files = glob(input_file)
-    result_csv = pd.DataFrame()
+    result_df = pd.DataFrame()
+    error_df = pd.DataFrame()
     data_list = []
     for log_file in tqdm(log_files):
         info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
         if info.normal_termination:
-            result_csv = result_csv.append(info.get_data_frame())
+            result_df = result_df.append(info.get_data_frame())
             data_list.append(info.get_torch_data())
+        else:
+            error_df = error_df.append(info.get_error_lines())
 
     if osp.isdir(output_path):
-        result_csv.to_csv(osp.join(output_path, "out.csv"), index=False)
+        result_df.to_csv(osp.join(output_path, "out.csv"), index=False)
+        error_df.to_csv(osp.join(output_path, "error.xlsx"), index=False)
         torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), "out.pt")
     else:
-        result_csv.to_csv(output_path + ".csv", index=False)
+        result_df.to_csv(output_path + ".csv", index=False)
+        error_df.to_csv(output_path + "_error.xlsx", index=False)
         torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path + ".pt")
 
 
