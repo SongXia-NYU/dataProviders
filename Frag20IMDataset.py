@@ -157,7 +157,7 @@ class Frag20IMDataset(InMemoryDataset):
 if __name__ == '__main__':
     # _data = Frag20IMDataset(root='data', n_heavy_atom=20, pre_transform=my_pre_transform, record_long_range=True,
     #                         bond_atom_sep=True, cal_3body_term=True, geometry='QM', add_sol=True)
-    for i in range(9, 21):
+    for i in range(9, 10):
         _data = Frag20IMDataset(root='data', n_heavy_atom=i, pre_transform=my_pre_transform, record_long_range=True,
-                                bond_atom_sep=True, cal_3body_term=True, geometry='QM', add_sol=True)
+                                bond_atom_sep=True, cal_3body_term=False, geometry='QM', add_sol=False)
     print("hello")

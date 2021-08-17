@@ -14,7 +14,7 @@ hartree2ev = Hartree / eV
 
 
 class DummyIMDataset(InMemoryDataset):
-    def __init__(self, root, dataset_name, split=None, sub_ref=False, **kwargs):
+    def __init__(self, root, dataset_name, split=None, sub_ref=False, convert_unit=True, **kwargs):
         self.sub_ref = sub_ref
         self.dataset_name = dataset_name
         self.split = split
@@ -35,7 +35,7 @@ class DummyIMDataset(InMemoryDataset):
                     if name in split_data.keys():
                         self.val_index = split_data[name]
         if self.sub_ref:
-            preprocess_dataset(osp.join(osp.dirname(__file__), "GaussUtils"), self)
+            preprocess_dataset(osp.join(osp.dirname(__file__), "GaussUtils"), self, convert_unit)
 
     @property
     def raw_file_names(self):
@@ -52,9 +52,10 @@ class DummyIMDataset(InMemoryDataset):
         pass
 
 
-def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data"):
+def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data", convert_unit=True):
     """
     Subtracting reference energy, the result is in eV unit
+    :param convert_unit:  Convert gas from hartree to ev. Set to false if it is already in ev
     :param data_root:
     :param dataset:
     :param save_path:
@@ -79,18 +80,19 @@ def subtract_ref(dataset, save_path, use_jianing_ref=True, data_root="./data"):
         total_ref = u0_ref[data.Z].sum()
         for prop in ["watEnergy", "octEnergy", "gasEnergy"]:
             energy = getattr(data, prop)
-            energy *= hartree2ev
+            if convert_unit:
+                energy *= hartree2ev
             energy -= total_ref
     if save_path is not None:
         torch.save((dataset.data, dataset.slices), save_path)
 
 
-def preprocess_dataset(data_root, data_provider, logger=None):
+def preprocess_dataset(data_root, data_provider, convert_unit, logger=None):
     # this "if" is because of my stupid decisions of subtracting reference beforehand in the "frag9to20_all" dataset
     # but later found it better to subtract it on the fly
     for name in ["gasEnergy", "watEnergy", "octEnergy"]:
         if name in data_provider[0]:
-            subtract_ref(data_provider, None, data_root=data_root)
+            subtract_ref(data_provider, None, data_root=data_root, convert_unit=convert_unit)
             if logger is not None:
                 logger.info("{} max: {}".format(name, getattr(data_provider.data, name).max().item()))
                 logger.info("{} min: {}".format(name, getattr(data_provider.data, name).min().item()))

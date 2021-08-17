@@ -83,6 +83,7 @@ class Gauss16Info:
         https://github.com/jenniening/Frag20_prepare/blob/master/DataGen/prepare_data.py
         :return:
         """
+        self.prop_dict_raw["f_name"] = self.base_name
         for idx, line in enumerate(self.log_lines):
             if line.startswith(' Rotational constants'):
                 vals = line.split()
@@ -213,21 +214,24 @@ class Gauss16Info:
 
     def _prop_ref(self):
         """ Get properties for each molecule, and convert properties in Hartree unit into eV unit """
-        reference_total_U0 = np.sum([self._reference[i][1] for i in self.elements])
-        reference_total_U = np.sum([self._reference[i][2] for i in self.elements])
-        reference_total_H = np.sum([self._reference[i][3] for i in self.elements])
-        reference_total_G = np.sum([self._reference[i][4] for i in self.elements])
-        self.prop_dict_raw["U0_atom"] = (self.prop_dict_raw["U0"] - reference_total_U0)
-        self.prop_dict_raw["U_atom"] = (self.prop_dict_raw["U"] - reference_total_U)
-        self.prop_dict_raw["H_atom"] = (self.prop_dict_raw["H"] - reference_total_H)
-        self.prop_dict_raw["G_atom"] = (self.prop_dict_raw["G"] - reference_total_G)
+        if "U0" in self.prop_dict_raw.keys():
+            reference_total_U0 = np.sum([self._reference[i][1] for i in self.elements])
+            self.prop_dict_raw["U0_atom"] = (self.prop_dict_raw["U0"] - reference_total_U0)
+        if "U" in self.prop_dict_raw.keys():
+            reference_total_U = np.sum([self._reference[i][2] for i in self.elements])
+            self.prop_dict_raw["U_atom"] = (self.prop_dict_raw["U"] - reference_total_U)
+        if "H" in self.prop_dict_raw.keys():
+            reference_total_H = np.sum([self._reference[i][3] for i in self.elements])
+            self.prop_dict_raw["H_atom"] = (self.prop_dict_raw["H"] - reference_total_H)
+        if "G" in self.prop_dict_raw.keys():
+            reference_total_G = np.sum([self._reference[i][4] for i in self.elements])
+            self.prop_dict_raw["G_atom"] = (self.prop_dict_raw["G"] - reference_total_G)
 
     def get_data_frame(self) -> pd.DataFrame:
         """
         :return: a single line dataframe in eV unit
         """
         pd_dict = {key: [self.prop_dict_raw[key]] for key in self.prop_dict_raw}
-        pd_dict["f_name"] = [self.base_name]
         return pd.DataFrame(pd_dict)
 
     def get_error_lines(self) -> pd.DataFrame:
