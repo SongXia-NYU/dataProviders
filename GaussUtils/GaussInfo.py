@@ -55,7 +55,7 @@ class Gauss16Info:
         self.mmff_lines = open(mmff_sdf).readlines() if mmff_sdf is not None else None
         if qm_sdf is None:
             qm_sdf = osp.join(self.dir, self.base_name + ".qm.sdf")
-            if not osp.exists(qm_sdf):
+            if (not osp.exists(qm_sdf)) and (log_path is not None):
                 os.system("obabel -ig16 {} -osdf -O {}".format(log_path, qm_sdf))
         self.qm_sdf = qm_sdf
         self.qm_lines = open(qm_sdf).readlines()
