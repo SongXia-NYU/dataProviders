@@ -280,12 +280,15 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16):
     error_df = pd.DataFrame()
     data_list = []
     for log_file in tqdm(log_files):
-        info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
-        if info.normal_termination:
-            result_df = result_df.append(info.get_data_frame())
-            data_list.append(info.get_torch_data())
-        else:
-            error_df = error_df.append(info.get_error_lines())
+        try:
+            info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
+            if info.normal_termination:
+                result_df = result_df.append(info.get_data_frame())
+                data_list.append(info.get_torch_data())
+            else:
+                error_df = error_df.append(info.get_error_lines())
+        except IndexError:
+            print(f"log finished normally but corrupted: {log_file}")
 
     if osp.isdir(output_path):
         result_df.to_csv(osp.join(output_path, "out.csv"), index=False)
