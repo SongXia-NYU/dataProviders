@@ -11,4 +11,4 @@ module purge
 singularity exec --nv \
             --overlay ~/conda_envs/pytorch1.9-cuda102-15GB-500K.ext3:ro \
             /scratch/work/public/singularity/cuda10.2-cudnn8-devel-ubuntu18.04.sif \
-            bash -c "source /ext3/env.sh; export PYTHONPATH=../../:../../Design-14-mem_pooling:$PYTHONPATH; python infuse_b_ext.py"
+            bash -c "source /ext3/env.sh; export PYTHONPATH=../../:../../../Design-14-mem_pooling:$PYTHONPATH; python infuse_b_ext.py"

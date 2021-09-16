@@ -3,18 +3,18 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
-#SBATCH --time=0:05:00
-#SBATCH --mem=20GB
+#SBATCH --time=1:10:00
+#SBATCH --mem=10GB
 #SBATCH --job-name=sol
-#SBATCH --array=0-118
+#SBATCH --array=0-1600
 
 module purge
 module load gaussian/intel/g16a03
 
-input_list=input_list_round2.txt
+input_list=plati20_gas_round1.txt 
 
-start=$((SLURM_ARRAY_TASK_ID*1))
-end=$((start+1))
+start=$((SLURM_ARRAY_TASK_ID*14))
+end=$((start+14))
 
 i=0
 while read -r line; do
