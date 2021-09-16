@@ -31,7 +31,7 @@ if __name__ == '__main__':
     # parser.add_argument("--header", type=str, default="header.txt")
     # args = parser.parse_args()
     # main(args.input_dir, args.output_dir, args.header)
-    # main("raw/plati20_sdfs", "raw/plati20_water_coms", header="header-water.txt")
-    # main("raw/plati20_sdfs", "raw/plati20_oct_coms", header="header-oct.txt")
+    main("raw/csd20_sdfs", "raw/plati20_water_coms", header="header-water.txt")
+    main("raw/plati20_sdfs", "raw/plati20_oct_coms", header="header-oct.txt")
     main("raw/plati20_sdfs", "raw/plati20_gas_coms", header="header-gas.txt")
 

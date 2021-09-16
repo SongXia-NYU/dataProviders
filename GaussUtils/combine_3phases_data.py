@@ -11,6 +11,10 @@ from DummyIMDataset import DummyIMDataset
 hartree2ev = Hartree / eV
 kcal2ev = 1 / 23.06035
 
+# R in kcal/(mol.K)
+R = 1.98720425864083e-3
+logP_to_watOct = 2.302585093 * R * 298.15
+
 
 def _diff_energy_kcal_mol(col1, col2, df: pd.DataFrame):
     # TODO: test it
@@ -31,6 +35,7 @@ def combine_csv(gas_csv, water_csv, oct_csv, paper_csv, out_csv):
     result["CalcSol"] = _diff_energy_kcal_mol("watEnergy", "gasEnergy", result)
     result["CalcOct"] = _diff_energy_kcal_mol("octEnergy", "gasEnergy", result)
     result["watOct"] = _diff_energy_kcal_mol("watEnergy", "octEnergy", result)
+    result["CalcLogP"] = result["watOct"] / logP_to_watOct
 
     paper_df = pd.read_csv(paper_csv)
     result["group"] = [paper_df.iloc[int(i)]["group"] for i in result.index]
@@ -53,7 +58,7 @@ def infuse_energy(sol_csv, dataset_p, dataset_root):
         this_idx = int(this_data["f_name"])
         if this_idx in sol_df.index:
             info = sol_df.loc[this_idx]
-            for key in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "watOct", "activity"]:
+            for key in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "watOct", "activity", "CalcLogP"]:
                 setattr(this_data, key, torch.as_tensor(info[key]))
 
             group = info["group"]
