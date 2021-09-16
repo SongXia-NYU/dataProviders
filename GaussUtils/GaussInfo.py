@@ -271,11 +271,14 @@ class Gauss16Info:
         return Data(**_tmp_data)
 
 
-def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16):
+def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test_run=False):
     if indexes is not None:
         log_files = [input_file.format(i) for i in indexes]
     else:
         log_files = glob(input_file)
+    if test_run:
+        log_files = log_files[:10]
+
     result_df = pd.DataFrame()
     error_df = pd.DataFrame()
     data_list = []
