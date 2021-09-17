@@ -10,4 +10,4 @@ if __name__ == '__main__':
         failed_set = set(com_list).difference(set(sdf_list))
         with open("plati20_round2.txt", "a") as f:
             for i in failed_set:
-                f.write(f"{folder_name}/{i}.com")
+                f.write(f"{folder_name}/{i}.com\n")
