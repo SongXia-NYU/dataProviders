@@ -296,11 +296,13 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test
     if osp.isdir(output_path):
         result_df.to_csv(osp.join(output_path, "out.csv"), index=False)
         error_df.to_csv(osp.join(output_path, "error.csv"), index=False)
-        torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), "out.pt")
+        torch.save(data_list, "out.pt")
+        # torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), "out.pt")
     else:
         result_df.to_csv(output_path + ".csv", index=False)
         error_df.to_csv(output_path + "_error.csv", index=False)
-        torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path + ".pt")
+        torch.save(data_list, f"{output_path}.pt")
+        # torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path + ".pt")
 
 
 def preprocess_frag20_sol():
