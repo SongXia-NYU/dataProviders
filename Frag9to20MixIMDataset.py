@@ -202,6 +202,7 @@ class Frag9to20MixIMDataset(InMemoryDataset):
                                  extended_bond=self.extended_bond, geometry=self.geometry,
                                  use_center=self.use_center, bond_atom_sep=self.bond_atom_sep,
                                  record_long_range=self.record_long_range, type_3_body=self.type_3_body)
+            print(f"you want to load: {name}")
             return [name]
         else:
             names = []
@@ -221,6 +222,7 @@ class Frag9to20MixIMDataset(InMemoryDataset):
                 name = name + '-{}.pt'.format(training_option)
                 names.append(name)
             names.append('sample-{}.pt'.format(self.split_settings['name']))
+            print(f"you want to load {names}")
             return names
 
     def download(self):
