@@ -37,10 +37,11 @@ def combine_csv(gas_csv, water_csv, oct_csv, paper_csv, out_csv):
     result["watOct"] = _diff_energy_kcal_mol("watEnergy", "octEnergy", result)
     result["CalcLogP"] = result["watOct"] / logP_to_watOct
 
-    paper_df = pd.read_csv(paper_csv)
-    result["group"] = [paper_df.iloc[int(i)]["group"] for i in result.index]
-    result["cano_smiles"] = [paper_df.iloc[int(i)]["cano_smiles"] for i in result.index]
-    result["activity"] = [paper_df.iloc[int(i)]["activity"] for i in result.index]
+    if paper_csv is not None:
+        paper_df = pd.read_csv(paper_csv)
+        result["group"] = [paper_df.iloc[int(i)]["group"] for i in result.index]
+        result["cano_smiles"] = [paper_df.iloc[int(i)]["cano_smiles"] for i in result.index]
+        result["activity"] = [paper_df.iloc[int(i)]["activity"] for i in result.index]
 
     result.to_csv(out_csv)
 
@@ -53,22 +54,27 @@ def infuse_energy(sol_csv, dataset_p, dataset_root):
     split = {"train_index": [],
              "valid_index": [],
              "test_index": []}
+    warning_keys = set()
     for i in range(len(dataset)):
         this_data = dataset[i]
         this_idx = int(this_data["f_name"])
         if this_idx in sol_df.index:
             info = sol_df.loc[this_idx]
             for key in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "watOct", "activity", "CalcLogP"]:
-                setattr(this_data, key, torch.as_tensor(info[key]))
+                if key in info:
+                    setattr(this_data, key, torch.as_tensor(info[key]))
+                else:
+                    if key not in warning_keys:
+                        print(f"{key} not present in csv file!")
+                    warning_keys.add(key)
 
-            group = info["group"]
+            group = info["group"] if "group" in info else "test"
             split[f"{group}_index"].append(current_idx)
             current_idx += 1
 
             this_data = my_pre_transform(this_data, edge_version="cutoff", do_sort_edge=True, cal_efg=False,
                                          cutoff=10.0, boundary_factor=100., use_center=True, mol=None,
-                                         cal_3body_term=False,
-                                         bond_atom_sep=False, record_long_range=True)
+                                         cal_3body_term=False, bond_atom_sep=False, record_long_range=True)
             data_list.append(this_data)
 
     collated = torch_geometric.data.InMemoryDataset.collate(data_list)
