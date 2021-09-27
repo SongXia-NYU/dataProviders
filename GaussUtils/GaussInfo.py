@@ -1,3 +1,4 @@
+from multiprocessing import Pool
 from typing import Union
 
 import pandas as pd
@@ -271,7 +272,18 @@ class Gauss16Info:
         return Data(**_tmp_data)
 
 
-def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test_run=False):
+def _process_single_file(log_file, gauss_version):
+    try:
+        info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
+        if info.normal_termination:
+            return info.get_data_frame(), info.get_torch_data(), None
+        else:
+            return None, None, info.get_error_lines()
+    except IndexError:
+        return None, None, None
+
+
+def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test_run=False, cpus=1):
     if indexes is not None:
         log_files = [input_file.format(i) for i in indexes]
     else:
@@ -282,16 +294,18 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test
     result_df = pd.DataFrame()
     error_df = pd.DataFrame()
     data_list = []
-    for log_file in tqdm(log_files):
-        try:
-            info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
-            if info.normal_termination:
-                result_df = result_df.append(info.get_data_frame())
-                data_list.append(info.get_torch_data())
-            else:
-                error_df = error_df.append(info.get_error_lines())
-        except IndexError:
-            print(f"log finished normally but corrupted: {log_file}")
+    mp_params = [(i, gauss_version) for i in log_files]
+    with Pool(cpus) as p:
+        result = (p.starmap(_process_single_file, mp_params))
+
+    for item in result:
+        this_result_df, this_data, this_error = item
+        if this_result_df is not None:
+            result_df = result_df.append(this_result_df)
+        if this_data is not None:
+            data_list.append(this_data)
+        if this_error is not None:
+            error_df = error_df.append(this_error)
 
     if osp.isdir(output_path):
         result_df.to_csv(osp.join(output_path, "out.csv"), index=False)
