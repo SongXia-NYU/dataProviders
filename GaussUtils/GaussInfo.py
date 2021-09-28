@@ -1,5 +1,6 @@
 from multiprocessing import Pool
 from typing import Union
+from tqdm.contrib.concurrent import process_map
 
 import pandas as pd
 from ase.units import Hartree, eV, Bohr, Ang
@@ -272,7 +273,9 @@ class Gauss16Info:
         return Data(**_tmp_data)
 
 
-def _process_single_file(log_file, gauss_version):
+def _process_single_file(log_file):
+    # TODO: MP doesn't support multiple argument
+    gauss_version = 16
     try:
         info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
         if info.normal_termination:
@@ -294,9 +297,7 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test
     result_df = pd.DataFrame()
     error_df = pd.DataFrame()
     data_list = []
-    mp_params = [(i, gauss_version) for i in log_files]
-    with Pool(cpus) as p:
-        result = (p.starmap(_process_single_file, mp_params))
+    result = process_map(_process_single_file, log_files, max_workers=cpus)
 
     for item in result:
         this_result_df, this_data, this_error = item
