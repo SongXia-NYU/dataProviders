@@ -297,7 +297,9 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test
     result_df = pd.DataFrame()
     error_df = pd.DataFrame()
     data_list = []
-    result = process_map(_process_single_file, log_files, max_workers=cpus, chunksize=16)
+    chunksize = len(log_files) // cpus + 1
+    with Pool(cpus) as p:
+        result = list(tqdm(p.imap(_process_single_file, log_files, chunksize=chunksize), total=len(log_files)))
 
     for item in result:
         this_result_df, this_data, this_error = item
