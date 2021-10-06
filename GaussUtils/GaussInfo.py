@@ -279,9 +279,11 @@ def _process_single_file(log_file):
     try:
         info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
         if info.normal_termination:
-            return info.get_data_frame(), info.get_torch_data(), None
+            idx = osp.basename(log_file).split(".")[0]
+            torch.save((info.get_data_frame(), info.get_torch_data(), None), f"tmp_{idx}.pt")
+            return None, None, None
         else:
-            return None, None, info.get_error_lines()
+            return None, None, None
     except IndexError:
         return None, None, None
 
