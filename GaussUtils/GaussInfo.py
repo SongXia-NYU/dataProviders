@@ -14,6 +14,7 @@ from tqdm import tqdm
 import argparse
 import numpy as np
 
+from functools import partial
 from DataPrepareUtils import my_pre_transform
 
 
@@ -273,14 +274,13 @@ class Gauss16Info:
         return Data(**_tmp_data)
 
 
-def _process_single_file(log_file):
+def _process_single_file(gauss_version, save_folder, log_file):
     # TODO: MP doesn't support multiple argument
-    gauss_version = 16
     try:
         info = Gauss16Info(log_path=log_file, gauss_version=gauss_version)
         if info.normal_termination:
             idx = osp.basename(log_file).split(".")[0]
-            torch.save((info.get_data_frame(), info.get_torch_data(), None), f"tmp_{idx}.pt")
+            torch.save((info.get_data_frame(), info.get_torch_data(), None), f"{save_folder}/tmp_{idx}.pt")
             return None, None, None
         else:
             return None, None, None
@@ -288,7 +288,7 @@ def _process_single_file(log_file):
         return None, None, None
 
 
-def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test_run=False, cpus=1):
+def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test_run=False, cpus=1, save_folder="gas"):
     if indexes is not None:
         log_files = [input_file.format(i) for i in indexes]
     else:
@@ -299,10 +299,11 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test
     result_df = pd.DataFrame()
     error_df = pd.DataFrame()
     data_list = []
-    chunksize = len(log_files) // cpus + 1
+    # chunksize = len(log_files) // cpus + 1
     chunksize = 3
+    this_func = partial(_process_single_file, gauss_version, save_folder)
     with Pool(cpus) as p:
-        result = list(tqdm(p.imap(_process_single_file, log_files, chunksize=chunksize), total=len(log_files)))
+        result = list(tqdm(p.imap(this_func, log_files, chunksize=chunksize), total=len(log_files)))
 
     for item in result:
         this_result_df, this_data, this_error = item
