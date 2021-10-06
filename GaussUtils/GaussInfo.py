@@ -301,6 +301,7 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test
     data_list = []
     # chunksize = len(log_files) // cpus + 1
     chunksize = 3
+    os.makedirs(save_folder, exist_ok=True)
     this_func = partial(_process_single_file, gauss_version, save_folder)
     with Pool(cpus) as p:
         result = list(tqdm(p.imap(this_func, log_files, chunksize=chunksize), total=len(log_files)))
