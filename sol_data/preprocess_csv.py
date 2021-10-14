@@ -27,7 +27,7 @@ def free_solv_sdfs():
     # error_list = torch.load("conf_error_list.pt")
     # concat_csv = pd.concat([train_csv, valid_csv, test_csv], ignore_index=True).iloc[error_list]
     concat_csv = pd.read_csv("lipop.csv")
-    runGenerator(concat_csv.index.tolist(), concat_csv["cano_smiles"].tolist(), "lipop", "raw/lipop_confs")
+    runGenerator(concat_csv.idx_name.tolist(), concat_csv["cano_smiles"].tolist(), "lipop", "raw/lipop_confs")
 
 
 def mmff_min_sdfs():
@@ -65,7 +65,7 @@ def convert_pt():
     dst = "processed/lipop_mmff.pt"
     split_dst = "processed/lipop_split.pt"
     data_list = []
-    for i in tqdm(target.index):
+    for i in tqdm(target.idx_name):
         sdf_f = osp.join(sdf_folder, "{}.mmff.sdf".format(i))
         more_target = {"activity": torch.as_tensor(target["activity"][i]).view(-1),
                        "group": np.array([target["group"][i]], dtype=object).reshape(-1)}
@@ -78,9 +78,9 @@ def convert_pt():
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
                osp.join(dst))
     group = target["group"].values
-    split = {"train_index": target.index[group == "train"],
-             "valid_index": target.index[group == "valid"],
-             "test_index": target.index[group == "test"]}
+    split = {"train_index": target.idx_name[group == "train"],
+             "valid_index": target.idx_name[group == "valid"],
+             "test_index": target.idx_name[group == "test"]}
     torch.save(split, split_dst)
 
 

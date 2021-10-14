@@ -39,9 +39,9 @@ def combine_csv(gas_csv, water_csv, oct_csv, paper_csv, out_csv):
 
     if paper_csv is not None:
         paper_df = pd.read_csv(paper_csv)
-        result["group"] = [paper_df.iloc[int(i)]["group"] for i in result.index]
-        result["cano_smiles"] = [paper_df.iloc[int(i)]["cano_smiles"] for i in result.index]
-        result["activity"] = [paper_df.iloc[int(i)]["activity"] for i in result.index]
+        result["group"] = [paper_df.iloc[int(i)]["group"] for i in result.idx_name]
+        result["cano_smiles"] = [paper_df.iloc[int(i)]["cano_smiles"] for i in result.idx_name]
+        result["activity"] = [paper_df.iloc[int(i)]["activity"] for i in result.idx_name]
 
     result.to_csv(out_csv)
 
@@ -58,7 +58,7 @@ def infuse_energy(sol_csv, dataset_p, dataset_root):
     for i in range(len(dataset)):
         this_data = dataset[i]
         this_idx = int(this_data["f_name"])
-        if this_idx in sol_df.index:
+        if this_idx in sol_df.idx_name:
             info = sol_df.loc[this_idx]
             for key in ["gasEnergy", "watEnergy", "octEnergy", "CalcSol", "CalcOct", "watOct", "activity", "CalcLogP"]:
                 if key in info:

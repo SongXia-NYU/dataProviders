@@ -37,7 +37,7 @@ def voronoi_edge_index(R, boundary_factor, use_center):
     :param boundary_factor: Manually setup a boundary for those points to avoid potential error, value of [1.1, inf]
     :param use_center: If true, the boundary will be centered on center of points; otherwise, boundary will be centered
     on [0., 0., 0.]
-    :return: calculated edge index
+    :return: calculated edge idx_name
     """
     R = scale_R(R)
 
@@ -96,7 +96,7 @@ def mol_to_edge_index(mol):
 
 def remove_bonding_edge(all_edge_index, bond_edge_index):
     """
-    Remove bonding index from atom_edge_index to avoid double counting
+    Remove bonding idx_name from atom_edge_index to avoid double counting
     :param all_edge_index:
     :param bond_edge_index:
     :return:
@@ -143,7 +143,7 @@ def my_pre_transform(data, edge_version, do_sort_edge, cal_efg, cutoff, boundary
                      cal_3body_term, bond_atom_sep, record_long_range, type_3_body='B', extended_bond=False):
     """
     edge calculation
-    atom_edge_index is non-bonding edge index when bond_atom_sep=True; Otherwise, it is bonding and non-bonding together
+    atom_edge_index is non-bonding edge idx_name when bond_atom_sep=True; Otherwise, it is bonding and non-bonding together
     """
     edge_index = torch.zeros(2, 0).long()
     dist, full_edge, _, _ = cal_edge(data.R, [data.N], [0], edge_index, cal_coulomb=True)
@@ -159,7 +159,7 @@ def my_pre_transform(data, edge_version, do_sort_edge, cal_efg, cutoff, boundary
         data.L_edge_index = remove_bonding_edge(full_edge, data.BN_edge_index)
 
     '''
-    sort edge index
+    sort edge idx_name
     '''
     if do_sort_edge:
         data.BN_edge_index = sort_edge(data.BN_edge_index)

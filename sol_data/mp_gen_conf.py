@@ -7,7 +7,7 @@ concat_csv = pd.read_csv("BBBP.csv")
 
 
 def _run_generator(i):
-    runGenerator([concat_csv.index.tolist()[i]], [concat_csv["SMILES"].tolist()[i]], "BBBP",
+    runGenerator([concat_csv.idx_name.tolist()[i]], [concat_csv["SMILES"].tolist()[i]], "BBBP",
                  "raw/BBBP_confs")
 
 

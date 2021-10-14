@@ -289,6 +289,8 @@ def _process_single_file(gauss_version, save_folder, log_file):
 
 
 def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test_run=False, cpus=1, save_folder="gas"):
+    # here we save a lot of temp files to solve memory issues in MP
+    # Please use a singularity container!
     if indexes is not None:
         log_files = [input_file.format(i) for i in indexes]
     else:
@@ -296,17 +298,24 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test
     if test_run:
         log_files = log_files[:10]
 
-    result_df = pd.DataFrame()
-    error_df = pd.DataFrame()
-    data_list = []
     # chunksize = len(log_files) // cpus + 1
     chunksize = 3
     os.makedirs(save_folder, exist_ok=True)
     this_func = partial(_process_single_file, gauss_version, save_folder)
     with Pool(cpus) as p:
         result = list(tqdm(p.imap(this_func, log_files, chunksize=chunksize), total=len(log_files)))
+    _sum_temp_files(save_folder, output_path)
 
-    for item in result:
+
+def _sum_temp_files(save_folder, output_path):
+    result_df = pd.DataFrame()
+    error_df = pd.DataFrame()
+    data_list = []
+    tmp_files = glob(osp.join(save_folder, "tmp_*.pt"))
+    # sort by index
+    tmp_files.sort(key=lambda s: int(s.split(".")[0].split("_")[1]))
+    for tmp_f in tmp_files:
+        item = torch.load(tmp_f)
         this_result_df, this_data, this_error = item
         if this_result_df is not None:
             result_df = result_df.append(this_result_df)
@@ -318,13 +327,13 @@ def read_gauss_log(input_file, output_path, indexes=None, gauss_version=16, test
     if osp.isdir(output_path):
         result_df.to_csv(osp.join(output_path, "out.csv"), index=False)
         error_df.to_csv(osp.join(output_path, "error.csv"), index=False)
-        torch.save(data_list, "out_list.pt")
-        # torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), "out.pt")
+        # torch.save(data_list, "out_list.pt")
+        torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), "out.pt")
     else:
         result_df.to_csv(output_path + ".csv", index=False)
         error_df.to_csv(output_path + "_error.csv", index=False)
-        torch.save(data_list, f"{output_path}_list.pt")
-        # torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path + ".pt")
+        # torch.save(data_list, f"{output_path}_list.pt")
+        torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), output_path + ".pt")
 
 
 def preprocess_frag20_sol():
@@ -358,13 +367,13 @@ def preprocess_frag20_sol():
         this_source = concat_csv["SourceFile"].iloc[i]
         if geometry in ["qm", "mmff", "mmff_gen"]:
             if this_source == "ccdc":
-                mask = (ccdc_target["index"] == this_id).values.reshape(-1)
+                mask = (ccdc_target["idx_name"] == this_id).values.reshape(-1)
                 tgt_dict = ccdc_target.loc[mask].iloc[0].to_dict()
                 sdf_file = osp.join(ccdc_root, "{}{}.sdf".format(this_id, cccd_ext))
                 dipole = ccdc_extra_target["dipole"][mask]
             else:
                 n_heavy = 9 if this_source == "less10" else int(this_source)
-                mask = (tgt_info_heavy[n_heavy]["index"] == this_id).values.reshape(-1)
+                mask = (tgt_info_heavy[n_heavy]["idx_name"] == this_id).values.reshape(-1)
                 tgt_dict = tgt_info_heavy[n_heavy].loc[mask].iloc[0].to_dict()
                 if n_heavy > 9:
                     sdf_file = osp.join(jl_root, "Frag20_{}_data".format(n_heavy),
@@ -434,7 +443,7 @@ def sdf_to_pt(n_heavy, src_root, dst_root, geometry="qm"):
     _f_name = ".opt" if geometry == "qm" else ""
 
     if n_heavy >= 10:
-        indexes = target_csv["index"].values.reshape(-1).tolist()
+        indexes = target_csv["idx_name"].values.reshape(-1).tolist()
         sdf = [osp.join(src_root, "Frag20_{}_data".format(n_heavy), "{}{}.sdf".format(i, _f_name)) for i in indexes]
     else:
         index_csv = pd.read_csv(osp.join(src_root, "Frag20_{}_index.csv".format(n_heavy, n_heavy)))
@@ -489,7 +498,7 @@ if __name__ == '__main__':
     parser.add_argument("--gauss_version", type=int, default=16)
     args = parser.parse_args()
     # if args.index_file is not None:
-    #     _indexes = pd.read_csv(args.index_file)["index"].values.reshape(-1).tolist()
+    #     _indexes = pd.read_csv(args.index_file)["idx_name"].values.reshape(-1).tolist()
     # else:
     #     _indexes = None
     # read_gauss_log(args.input_file, args.output_file, _indexes, args.gauss_version)

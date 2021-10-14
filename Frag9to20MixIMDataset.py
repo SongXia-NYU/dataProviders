@@ -105,7 +105,7 @@ class Frag9to20MixIMDataset(InMemoryDataset):
             # self.train_index = torch.cat([train_valid_index[split_selected_combined['train']],
             #                               train_valid_index[split_selected_combined['test']],
             #                               test_index])
-            # self.test_index = torch.arange(10)  # dummy test index
+            # self.test_index = torch.arange(10)  # dummy test idx_name
             # if self.jianing_split or self.all_data:
             split_file = np.load(self.raw_paths[0])
             if self.training_option in ['train', 'testDummy']:
@@ -148,7 +148,7 @@ class Frag9to20MixIMDataset(InMemoryDataset):
 
             self.train_index = torch.arange(self.train_size)
             self.val_index = torch.arange(self.train_size, self.train_size + self.val_size)
-            # since we separate test from train and valid, test index was set to 0-test size
+            # since we separate test from train and valid, test idx_name was set to 0-test size
             self.test_index = torch.arange(0, self.test_size)
 
             self.val_index_separate = self.index_separate(self.train_size, self.val_index_perm)
@@ -288,7 +288,7 @@ class Frag9to20MixIMDataset(InMemoryDataset):
                     for i in tqdm(range(len(data))):
                         InChI = info_csv[col_name][i]
                         try:
-                            this_sol_data = frag20_sol_i.iloc[frag20_sol_inchi_list.index(InChI)]
+                            this_sol_data = frag20_sol_i.iloc[frag20_sol_inchi_list.idx_name(InChI)]
                             # print(this_sol_data)
                         except ValueError:
                             this_sol_data = None

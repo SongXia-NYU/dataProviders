@@ -8,7 +8,7 @@ if __name__ == '__main__':
     DD2JL_csv_f = osp.join("/ext3/Frag20_{}/Frag20_{}_frag_index.csv".format(n_heavy, n_heavy))
     DD2JL_csv = pd.read_csv(DD2JL_csv_f)
     failed_csv = pd.read_csv("octanol_fail_{}.csv".format(n_heavy))
-    failed_JL_index = [DD2JL_csv.loc[DD2JL_csv["index"] == dd_index]["frags_index"].item()
+    failed_JL_index = [DD2JL_csv.loc[DD2JL_csv["idx_name"] == dd_index]["frags_index"].item()
                        for dd_index in failed_csv.values.reshape(-1).tolist()]
 
     print(failed_JL_index)

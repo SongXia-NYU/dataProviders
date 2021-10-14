@@ -57,7 +57,7 @@ class Qm9InMemoryDataset(InMemoryDataset):
     @property
     def raw_file_names(self):
         """
-        record id to better index paths
+        record id to better idx_name paths
         :return:
         """
         _id = 0
