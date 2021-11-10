@@ -1,5 +1,4 @@
-/data/raw/*.pt
-/data/processed/*.pt
+/data
 /sol_data/raw/*.pt
 /sol_data/processed/*.pt
 /prepare_data.bash
@@ -13,3 +12,4 @@ slurm*.out
 /dd_sol_exp
 /__pycache__
 /cy_PL_dataset
+/local_scripts
