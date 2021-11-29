@@ -123,11 +123,7 @@ class Frag9to20MixIMDataset(InMemoryDataset):
             if self.add_sol:
                 sol_split_file = osp.join(self.processed_dir, "frag20_sol_split.pt")
                 if not osp.exists(sol_split_file):
-                    perm_tensor = torch.randperm(len(self))
-                    _split = {"train_index": perm_tensor[:-41000],
-                              "val_index": perm_tensor[-41000: -40000],
-                              "test_index": perm_tensor[-40000:]}
-                    torch.save(_split, sol_split_file)
+                    raise ValueError()
                 else:
                     _split = torch.load(sol_split_file)
                 for key in _split:

@@ -1,12 +1,16 @@
 import time
+from typing import List
 
 import numpy as np
 import torch
+import torch_geometric
 from ase.units import Hartree, eV
 from scipy.spatial import Voronoi
 from torch_geometric.data import Data
 from tqdm import tqdm
+import os.path as osp
 
+from DummyIMDataset import DummyIMDataset
 from utils.utils_functions import cal_edge
 
 hartree2ev = Hartree / eV
@@ -370,4 +374,48 @@ def remove_atom_from_dataset(atom_z, dataset, remove_split=('train', 'valid', 't
         return mask_dict['train'], mask_dict['valid'], mask_dict['test']
     else:
         return removed_index['train'], removed_index['valid'], removed_index['test']
+
+
+def concat_im_datasets(root: str, datasets: List[str], out_name: str, splits: List[str]):
+    data_list = []
+    prev_dataset_size = 0
+    concat_split = {
+        "train_index": [],
+        "val_index": [],
+        "test_index": []
+    }
+    for dataset, split in zip(datasets, splits):
+        dummy_dataset = DummyIMDataset(root, dataset, split)
+        for attr in ["B_edge_index", "num_B_edge", "B_msg_edge_index", "num_B_msg_edge",
+                     "L_edge_index", "num_L_edge", "L_msg_edge_index", "num_L_msg_edge",
+                     "N_edge_index", "num_N_edge", "N_msg_edge_index", "num_N_msg_edge"]:
+            if hasattr(dummy_dataset.data, attr):
+                delattr(dummy_dataset.data, attr)
+                del dummy_dataset.slices[attr]
+        for i in tqdm(range(len(dummy_dataset)), dataset):
+            data_list.append(dummy_dataset[i])
+        this_size = 0
+        for key in concat_split.keys():
+            this_index = getattr(dummy_dataset, key)
+            if this_index is not None:
+                this_index = torch.as_tensor(this_index)
+                this_index = this_index + prev_dataset_size
+                this_size += len(this_index)
+                concat_split[key].append(this_index)
+        prev_dataset_size += this_size
+    print("saving... it is recommended to have 32GB memory")
+    torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
+               osp.join(root, "processed", out_name + ".pt"))
+    for key in concat_split:
+        if len(concat_split[key]) > 0:
+            concat_split[key] = torch.cat(concat_split[key], dim=0)
+        else:
+            concat_split[key] = None
+    torch.save(concat_split, osp.join(root, "processed", out_name + "_split.pt"))
+
+
+if __name__ == '__main__':
+    concat_im_datasets("data", ["frag20reducedAll-Bmsg-cutoff-10.00-sorted-defined_edge-lr-MMFF.pt",
+                                "eMol9_raw_mmff.pt"], "frag20_eMol9_combined_MMFF",
+                       ["frag20_all_split.pt", "eMol9_split.pt"])
 

@@ -12,4 +12,4 @@ slurm*.out
 /dd_sol_exp
 /__pycache__
 /cy_PL_dataset
-/local_scripts
+/local_files
