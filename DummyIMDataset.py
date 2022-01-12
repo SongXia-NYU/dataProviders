@@ -1,5 +1,6 @@
 import logging
 import os.path as osp
+import warnings
 from typing import List
 
 import numpy as np
@@ -23,18 +24,21 @@ class DummyIMDataset(InMemoryDataset):
         self.train_index, self.val_index, self.test_index = None, None, None
         if split is not None:
             split_data = torch.load(self.processed_paths[1])
-            self.test_index = split_data["test_index"]
+            self.test_index = torch.as_tensor(split_data["test_index"])
             if ("valid_index" not in split_data) and ("val_index" not in split_data):
+                warnings.warn("You are randomly generating valid set from training set")
                 train_index = split_data["train_index"]
                 perm_matrix = torch.randperm(len(train_index))
                 self.train_index = train_index[perm_matrix[:-1000]]
                 self.val_index = train_index[perm_matrix[-1000:]]
             else:
-                self.train_index = split_data["train_index"]
+                self.train_index = torch.as_tensor(split_data["train_index"]).long()
+                self.test_index = torch.as_tensor(split_data["test_index"]).long()
                 for name in ["val_index", "valid_index"]:
                     if name in split_data.keys():
-                        self.val_index = split_data[name]
+                        self.val_index = torch.as_tensor(split_data[name]).long()
         if self.sub_ref:
+            warnings.warn("sub_ref is deprecated")
             preprocess_dataset(osp.join(osp.dirname(__file__), "GaussUtils"), self, convert_unit)
 
     @property
@@ -108,4 +112,9 @@ def concat_im_datasets(root: str, datasets: List[str], out_name: str):
     print("saving... it is recommended to have 32GB memory")
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list),
                osp.join(root, "data/processed", out_name))
+
+
+if __name__ == '__main__':
+    test_data = DummyIMDataset(root="data", dataset_name="freesolv_mmff_pyg.pt", split="freesolv_mmff_pyg_split.pt")
+    print("")
 

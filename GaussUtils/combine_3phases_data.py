@@ -1,9 +1,9 @@
+import os.path as osp
+
 import pandas as pd
 import torch
 import torch_geometric.data
 from ase.units import Hartree, eV
-import os
-import os.path as osp
 
 from DataPrepareUtils import my_pre_transform
 from DummyIMDataset import DummyIMDataset
