@@ -1,3 +1,5 @@
+import argparse
+
 import torch
 import os.path as osp
 
@@ -9,7 +11,7 @@ from dscribe.descriptors.acsf import ACSF
 from tqdm import tqdm
 
 
-def add_acsf():
+def add_acsf(dataset_name, save_name):
     dataset_name = "frag20reducedAllSolRef-Bmsg-cutoff-10.00-sorted-defined_edge-lr-MMFF.pt"
     save_name = "frag20reducedAllSolRef-Bmsg-cutoff-10.00-sorted-defined_edge-lr-acsf308-MMFF.pt"
 
@@ -30,5 +32,15 @@ def add_acsf():
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), osp.join("../data/processed", save_name))
 
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset_name")
+    parser.add_argument("--save_name")
+    args = parser.parse_args()
+    args = vars(args)
+
+    add_acsf(**args)
+
+
 if __name__ == '__main__':
-    add_acsf()
+    main()
