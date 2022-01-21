@@ -12,8 +12,6 @@ from tqdm import tqdm
 
 
 def add_acsf(dataset_name, save_name):
-    dataset_name = "frag20reducedAllSolRef-Bmsg-cutoff-10.00-sorted-defined_edge-lr-MMFF.pt"
-    save_name = "frag20reducedAllSolRef-Bmsg-cutoff-10.00-sorted-defined_edge-lr-acsf308-MMFF.pt"
 
     acsf = ACSF(species=['B', 'Br', 'C', 'Cl', 'F', 'H', 'N', 'O', 'P', 'S', 'I'], rcut=6.0,
                 g2_params=[[1, 1], [1, 2], [1, 3]], g4_params=[[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]])
@@ -28,6 +26,8 @@ def add_acsf(dataset_name, save_name):
         this_data.acsf = this_acsf
 
         data_list.append(this_data)
+
+    del dataset
 
     torch.save(torch_geometric.data.InMemoryDataset.collate(data_list), osp.join("../data/processed", save_name))
 
