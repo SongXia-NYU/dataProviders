@@ -2,9 +2,9 @@
 #
 #SBATCH --job-name=vis_al
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=1
 #SBATCH --time=1:00:00
-#SBATCH --mem=40GB
+#SBATCH --mem=150GB
 
 module purge
 singularity exec --nv --overlay ~/conda_envs/pytorch1.8.1-rocm4.0.1-extra-5GB-3.2M.ext3:ro --overlay ~/conda_envs/pytorch1.8.1-rocm4.0.1.sqf:ro \
