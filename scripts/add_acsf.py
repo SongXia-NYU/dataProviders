@@ -22,7 +22,7 @@ def add_acsf(dataset_name, save_name):
     for i in tqdm(range(len(dataset)), total=len(dataset)):
         this_data = dataset[i]
         atoms = Atoms(numbers=this_data.Z.numpy(), positions=this_data.R.numpy())
-        this_acsf = acsf.create(atoms, n_jobs=4)
+        this_acsf = torch.as_tensor(acsf.create(atoms, n_jobs=1))
         this_data.acsf = this_acsf
 
         data_list.append(this_data)
