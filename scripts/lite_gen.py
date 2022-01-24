@@ -6,7 +6,7 @@ from DummyIMDataset import DummyIMDataset
 
 
 def lite_gen():
-    dataset_name = ""
+    dataset_name = "frag20reducedAllSolRef-Bmsg-cutoff-10.00-sorted-defined_edge-lr-MMFF.pt"
     save_name = "acsf308_lite.pt"
     save_split_name = "acsf308_lite_split.pt"
 
