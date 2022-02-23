@@ -32,6 +32,10 @@ class DummyIMDataset(InMemoryDataset):
                 self.train_index = train_index[perm_matrix[:-1000]]
                 self.val_index = train_index[perm_matrix[-1000:]]
             else:
+                if split_data["train_index"] is None:
+                    split_data["train_index"] = []
+                if split_data["test_index"] is None:
+                    split_data["test_index"] = []
                 self.train_index = torch.as_tensor(split_data["train_index"]).long()
                 self.test_index = torch.as_tensor(split_data["test_index"]).long()
                 for name in ["val_index", "valid_index"]:
