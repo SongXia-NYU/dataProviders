@@ -40,6 +40,8 @@ class DummyIMDataset(InMemoryDataset):
                 self.test_index = torch.as_tensor(split_data["test_index"]).long()
                 for name in ["val_index", "valid_index"]:
                     if name in split_data.keys():
+                        if split_data[name] is None:
+                            split_data[name] = []
                         self.val_index = torch.as_tensor(split_data[name]).long()
         if self.sub_ref:
             warnings.warn("sub_ref is deprecated")
