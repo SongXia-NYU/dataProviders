@@ -32,17 +32,22 @@ class DummyIMDataset(InMemoryDataset):
                 self.train_index = train_index[perm_matrix[:-1000]]
                 self.val_index = train_index[perm_matrix[-1000:]]
             else:
-                if split_data["train_index"] is None:
-                    split_data["train_index"] = []
-                if split_data["test_index"] is None:
-                    split_data["test_index"] = []
-                self.train_index = torch.as_tensor(split_data["train_index"]).long()
-                self.test_index = torch.as_tensor(split_data["test_index"]).long()
+                if split_data["train_index"] is not None:
+                    self.train_index = torch.as_tensor(split_data["train_index"]).long()
+                else:
+                    self.train_index = None
+
+                if split_data["test_index"] is not None:
+                    self.test_index = torch.as_tensor(split_data["test_index"]).long()
+                else:
+                    self.test_index = None
+
                 for name in ["val_index", "valid_index"]:
                     if name in split_data.keys():
-                        if split_data[name] is None:
-                            split_data[name] = []
-                        self.val_index = torch.as_tensor(split_data[name]).long()
+                        if split_data[name] is not None:
+                            self.val_index = torch.as_tensor(split_data[name]).long()
+                        else:
+                            self.val_index = None
         if self.sub_ref:
             warnings.warn("sub_ref is deprecated")
             preprocess_dataset(osp.join(osp.dirname(__file__), "GaussUtils"), self, convert_unit)
