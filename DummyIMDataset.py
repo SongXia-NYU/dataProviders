@@ -32,7 +32,7 @@ class DummyIMDataset(InMemoryDataset):
                 rand_val_index = True
             if rand_val_index:
                 warnings.warn("You are randomly generating valid set from training set")
-                train_index = split_data["train_index"]
+                train_index = torch.as_tensor(split_data["train_index"]).long()
                 np.random.seed(2333)
                 perm_matrix = np.random.permutation(len(train_index))
                 self.train_index = train_index[perm_matrix[:-1000]]
