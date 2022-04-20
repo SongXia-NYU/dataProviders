@@ -1,6 +1,8 @@
 /data
-/sol_data/raw/*.pt
-/sol_data/processed/*.pt
+/sol_data
+/freesolv_process
+/lipop_process
+/plati20_process
 /prepare_data.bash
 /conf_error_list.pt
 /*.pbs
