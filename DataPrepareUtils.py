@@ -329,8 +329,8 @@ def physnet_to_datalist(self, N, R, E, D, Q, Z, num_mol, mols, efgs_batch, EFG_R
     return data_list
 
 
-def remove_atom_from_dataset(atom_z, dataset, remove_split=('train', 'valid', 'test'), explicit_split=None,
-                             return_mask=False):
+def rm_atom(atom_z, dataset, remove_split=('train', 'valid', 'test'), explicit_split=None,
+            return_mask=False):
     """
     remove a specific atom from dataset
     H: 1
