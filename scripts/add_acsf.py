@@ -12,9 +12,11 @@ from tqdm import tqdm
 
 
 def add_acsf(dataset_name, save_name):
-
-    acsf = ACSF(species=['B', 'Br', 'C', 'Cl', 'F', 'H', 'N', 'O', 'P', 'S', 'I'], rcut=6.0,
-                g2_params=[[1, 1], [1, 2], [1, 3]], g4_params=[[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]])
+    acsf = ACSF(
+        species=['B', 'Br', 'C', 'Cl', 'F', 'H', 'N', 'O', 'P', 'S'],
+        rcut=6.0,
+        g2_params=[[1, 1], [1, 2], [1, 3]],
+        g4_params=[[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]], )
 
     dataset = DummyIMDataset(root="../data", dataset_name=dataset_name)
     data_list = []
