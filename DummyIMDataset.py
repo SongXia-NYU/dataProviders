@@ -25,11 +25,17 @@ class DummyIMDataset(InMemoryDataset):
         if split is not None:
             split_data = torch.load(self.processed_paths[1])
             self.test_index = torch.as_tensor(split_data["test_index"])
+
+            # A hell of logic
             rand_val_index = False
             if ("valid_index" not in split_data) and ("val_index" not in split_data):
                 rand_val_index = True
             elif "val_index" in split_data and split_data["val_index"] is None:
                 rand_val_index = True
+            # And even more
+            if rand_val_index and split_data["train_index"] is None:
+                rand_val_index = False
+
             if rand_val_index:
                 warnings.warn("You are randomly generating valid set from training set")
                 train_index = torch.as_tensor(split_data["train_index"]).long()
