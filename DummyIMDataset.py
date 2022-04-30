@@ -15,12 +15,16 @@ hartree2ev = Hartree / eV
 
 
 class DummyIMDataset(InMemoryDataset):
-    def __init__(self, root, dataset_name, split=None, sub_ref=False, convert_unit=True, **kwargs):
+    def __init__(self, root, dataset_name, split=None, sub_ref=False, convert_unit=True, valid_size=1000, collate=True,
+                 **kwargs):
         self.sub_ref = sub_ref
         self.dataset_name = dataset_name
         self.split = split
         super().__init__(root, None, None)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        if collate:
+            self.data, self.slices = InMemoryDataset.collate(torch.load(self.processed_paths[0]))
+        else:
+            self.data, self.slices = torch.load(self.processed_paths[0])
         self.train_index, self.val_index, self.test_index = None, None, None
         if split is not None:
             split_data = torch.load(self.processed_paths[1])
@@ -37,12 +41,13 @@ class DummyIMDataset(InMemoryDataset):
                 rand_val_index = False
 
             if rand_val_index:
+                valid_size = int(valid_size)
                 warnings.warn("You are randomly generating valid set from training set")
                 train_index = torch.as_tensor(split_data["train_index"]).long()
                 np.random.seed(2333)
                 perm_matrix = np.random.permutation(len(train_index))
-                self.train_index = train_index[perm_matrix[:-1000]]
-                self.val_index = train_index[perm_matrix[-1000:]]
+                self.train_index = train_index[perm_matrix[:-valid_size]]
+                self.val_index = train_index[perm_matrix[-valid_size:]]
             else:
                 if split_data["train_index"] is not None:
                     self.train_index = torch.as_tensor(split_data["train_index"]).long()
