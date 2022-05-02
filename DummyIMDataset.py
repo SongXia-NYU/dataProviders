@@ -15,7 +15,7 @@ hartree2ev = Hartree / eV
 
 
 class DummyIMDataset(InMemoryDataset):
-    def __init__(self, root, dataset_name, split=None, sub_ref=False, convert_unit=True, valid_size=1000, collate=True,
+    def __init__(self, root, dataset_name, split=None, sub_ref=False, convert_unit=True, valid_size=1000, collate=False,
                  **kwargs):
         self.sub_ref = sub_ref
         self.dataset_name = dataset_name
